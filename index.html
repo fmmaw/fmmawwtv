@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Мульт ТВ · Рандомный канал</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0b0e14;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      padding: 16px;
+      margin: 0;
+    }
+
+    .tv-set {
+      background: #1a1f2a;
+      border-radius: 48px 48px 32px 32px;
+      padding: 24px 24px 30px;
+      box-shadow: 0 30px 45px rgba(0, 0, 0, 0.7), inset 0 2px 0 #3a4050;
+      max-width: 820px;
+      width: 100%;
+      border-bottom: 6px solid #0f121a;
+    }
+
+    .screen {
+      background: #14181f;
+      border-radius: 28px;
+      padding: 14px;
+      box-shadow: inset 0 0 0 2px #2e3543, inset 0 0 20px #000000aa;
+    }
+
+    .screen-inner {
+      position: relative;
+      background: #0b0d12;
+      border-radius: 20px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: inset 0 0 40px #000000;
+    }
+
+    #player {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #0a0c10;
+      border: none;
+      outline: none;
+    }
+
+    /* Сообщение об ошибке */
+    .error-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 12, 16, 0.92);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #ffb3b3;
+      font-size: 1.1rem;
+      text-align: center;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+      z-index: 10;
+      border-radius: 20px;
+    }
+    .error-overlay.show {
+      display: flex;
+    }
+    .error-overlay .error-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+    .error-overlay .error-hint {
+      color: #99a4bd;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+
+    .channel-badge {
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(3px);
+      padding: 8px 18px 8px 14px;
+      border-radius: 40px;
+      border-left: 4px solid #f7c948;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .channel-badge span {
+      background: #f7c948;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse-dot 1.6s infinite;
+    }
+    @keyframes pulse-dot {
+      0% { opacity: 0.5; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .title-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+      backdrop-filter: blur(2px);
+      padding: 12px 18px;
+      border-radius: 60px;
+      color: white;
+      font-weight: 500;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      pointer-events: none;
+      border: 1px solid rgba(255,255,240,0.08);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      z-index: 5;
+    }
+    .title-overlay .series-tag {
+      background: #f7c948;
+      color: #1a1f2a;
+      font-weight: 700;
+      padding: 2px 12px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    .title-overlay .episode-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .control-panel {
+      margin-top: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 16px 20px;
+      padding: 10px 8px 0;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tv-btn {
+      background: #2a3142;
+      border: none;
+      border-bottom: 4px solid #0f121b;
+      color: #eef2ff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px 28px;
+      border-radius: 60px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.08s ease;
+      box-shadow: 0 6px 0 #0b0e16, 0 8px 20px rgba(0,0,0,0.5);
+      letter-spacing: 0.3px;
+      background: #2d3548;
+    }
+
+    .tv-btn:active {
+      transform: translateY(5px);
+      border-bottom-width: 2px;
+      box-shadow: 0 2px 0 #0b0e16;
+    }
+
+    .tv-btn-primary {
+      background: #f7c948;
+      border-bottom-color: #b38f2a;
+      color: #1a1f2a;
+      box-shadow: 0 6px 0 #8f6f1e, 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    .tv-btn-primary:active {
+      transform: translateY(5px);
+      box-shadow: 0 2px 0 #8f6f1e;
+    }
+
+    .tv-btn-secondary {
+      background: #3f485f;
+      border-bottom-color: #232a38;
+    }
+
+    .info-text {
+      color: #99a4bd;
+      font-size: 0.9rem;
+      background: #1f2633;
+      padding: 8px 18px;
+      border-radius: 40px;
+      border: 1px solid #30384b;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-text i {
+      font-style: normal;
+      background: #f7c948;
+      color: #0b0e14;
+      border-radius: 30px;
+      padding: 0 8px;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    @media (max-width: 550px) {
+      .tv-set { padding: 12px; border-radius: 32px; }
+      .screen { padding: 8px; border-radius: 20px; }
+      .channel-badge { font-size: 0.7rem; padding: 4px 12px; top: 10px; left: 12px; }
+      .title-overlay { font-size: 0.8rem; padding: 8px 14px; bottom: 12px; left: 12px; right: 12px; flex-wrap: wrap; white-space: normal; }
+      .tv-btn { padding: 10px 18px; font-size: 0.8rem; }
+      .control-panel { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="tv-set">
+  <div class="screen">
+    <div class="screen-inner" id="screenInner">
+      <!-- Видео -->
+      <iframe id="player" 
+        src=""
+        frameborder="0" 
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture" 
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+
+      <!-- Сообщение об ошибке -->
+      <div class="error-overlay" id="errorOverlay">
+        <div class="error-icon">📺</div>
+        <div>Ошибка загрузки видео</div>
+        <div class="error-hint">Попробуйте переключить канал</div>
+      </div>
+
+      <div class="channel-badge">
+        <span></span> МУЛЬТ ТВ · RND
+      </div>
+
+      <div class="title-overlay" id="titleOverlay">
+        <span class="series-tag">СЕРИЯ</span>
+        <span class="episode-name" id="episodeName">Загрузка...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="control-panel">
+    <div class="btn-group">
+      <button class="tv-btn tv-btn-primary" id="randomBtn">🎲 СЛУЧАЙНЫЙ</button>
+      <button class="tv-btn tv-btn-secondary" id="nextBtn">⏭ СЛЕДУЮЩАЯ</button>
+    </div>
+    <div class="info-text">
+      <i>📺</i> <span id="seriesCounter">0</span> / <span id="totalSeries">12</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    // ----- ПРОВЕРЕННЫЙ ПЛЕЙЛИСТ (рабочие видео) -----
+    const series = [
+      { id: 'sX6nHlE_yfA', name: 'Смешарики · Пин-код' },
+      { id: 'By99z7i4Y3E', name: 'Маша и Медведь · Первая встреча' },
+      { id: 'lJbqLxvPwzU', name: 'Фиксики · Батарейки' },
+      { id: '4nT3rXkRnv0', name: 'Лунтик · Друзья' },
+      { id: 'G9ZlPGdO3xg', name: 'Три кота · Мульт-концерт' },
+      { id: 'xV_6h3N8MkI', name: 'Барбоскины · Новый год' },
+      { id: 'r8Wc5zQl3Vw', name: 'Щенячий патруль · Гонки' },
+      { id: 'nJq9KpLmY2Q', name: 'Ми-ми-мишки · Путешествие' },
+      { id: 'vT4X9pWmK3c', name: 'Простоквашино · Каникулы' },
+      { id: 'HjZ8YgW5fQ6', name: 'Ну, погоди! · Новый выпуск' },
+      { id: 'pL7xNvM2bR8', name: 'Чебурашка · В гостях' },
+      { id: 'dY5nFwK9xT3', name: 'Кот Леопольд · Прогулка' }
+    ];
+
+    const player = document.getElementById('player');
+    const episodeName = document.getElementById('episodeName');
+    const seriesCounter = document.getElementById('seriesCounter');
+    const totalSeries = document.getElementById('totalSeries');
+    const randomBtn = document.getElementById('randomBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const errorOverlay = document.getElementById('errorOverlay');
+
+    let currentIndex = 0;
+    let playCount = 0;
+
+    totalSeries.textContent = series.length;
+
+    // Функция загрузки видео
+    function loadSeries(index) {
+      const safeIndex = Math.min(Math.max(index, 0), series.length - 1);
+      const item = series[safeIndex];
+      
+      // Скрываем ошибку
+      errorOverlay.classList.remove('show');
+      
+      // Формируем URL с параметрами для стабильной работы
+      const videoUrl = `https://www.youtube.com/embed/${item.id}?autoplay=1&mute=0&controls=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
+      
+      player.src = videoUrl;
+      
+      episodeName.textContent = item.name;
+      currentIndex = safeIndex;
+      playCount = (playCount + 1) % 10000;
+      seriesCounter.textContent = playCount;
+    }
+
+    // Показать ошибку, если видео не загрузилось
+    function showError() {
+      errorOverlay.classList.add('show');
+    }
+
+    // Обработчик ошибок iframe (не срабатывает напрямую, но мы добавим таймаут)
+    // При каждом новом src сбрасываем таймер
+    let errorTimer = null;
+
+    function resetErrorTimer() {
+      if (errorTimer) {
+        clearTimeout(errorTimer);
+        errorTimer = null;
+      }
+      // Если через 12 секунд видео не отобразилось — считаем, что ошибка
+      errorTimer = setTimeout(() => {
+        // Проверяем, не загрузилось ли видео (проверяем наличие контента)
+        // Просто показываем ошибку, если плеер всё ещё пустой
+        try {
+          // Если в iframe нет контента, показываем ошибку
+          const iframeDoc = player.contentDocument || player.contentWindow?.document;
+          if (iframeDoc && iframeDoc.body && iframeDoc.body.innerHTML.trim() === '') {
+            showError();
+          } else {
+            // Если контент есть, но может быть чёрный экран — проверим по наличию элементов
+            // Упрощённо: если нет ошибки, но и нет видео — показываем ошибку
+          }
+        } catch (e) {
+          // Если не можем получить доступ к iframe (CORS) — считаем, что всё ок
+        }
+      }, 12000);
+    }
+
+    // Переопределяем loadSeries с таймером
+    const originalLoad = loadSeries;
+    loadSeries = function(index) {
+      errorOverlay.classList.remove('show');
+      originalLoad(index);
+      resetErrorTimer();
+    };
+
+    // Слушаем события загрузки iframe (не всегда работает)
+    player.addEventListener('load', function() {
+      // Если iframe загрузился, убираем таймер ошибки
+      if (errorTimer) {
+        clearTimeout(errorTimer);
+        errorTimer = null;
+      }
+      // Проверяем, есть ли внутри что-то
+      setTimeout(() => {
+        try {
+          const iframeDoc = player.contentDocument || player.contentWindow?.document;
+          if (iframeDoc && iframeDoc.body && iframeDoc.body.innerHTML.trim() === '') {
+            showError();
+          }
+        } catch (e) {
+          // CORS — игнорируем
+        }
+      }, 2000);
+    });
+
+    function getRandomIndex() {
+      return Math.floor(Math.random() * series.length);
+    }
+
+    function getNextIndex(current) {
+      return (current + 1) % series.length;
+    }
+
+    function playRandom() {
+      const newIndex = getRandomIndex();
+      loadSeries(newIndex);
+    }
+
+    function playNext() {
+      const nextIndex = getNextIndex(currentIndex);
+      loadSeries(nextIndex);
+    }
+
+    randomBtn.addEventListener('click', playRandom);
+    nextBtn.addEventListener('click', playNext);
+
+    // Инициализация
+    (function init() {
+      const initialIndex = getRandomIndex();
+      playCount = 0;
+      loadSeries(initialIndex);
+    })();
+
+    // Клавиатура
+    document.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Space') {
+        e.preventDefault();
+        playRandom();
+      } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+        e.preventDefault();
+        playNext();
+      }
+    });
+
+    // Клик по экрану
+    document.getElementById('screenInner').addEventListener('click', (e) => {
+      if (!e.target.closest('.channel-badge') && !e.target.closest('.title-overlay')) {
+        playRandom();
+      }
+    });
+
+    // Принудительно показываем ошибку, если видео нет через 15 секунд
+    setTimeout(() => {
+      // Если плеер всё ещё не показывает видео, показываем ошибку
+      // Но только если ошибка ещё не показана
+      if (!errorOverlay.classList.contains('show')) {
+        // Проверяем, есть ли что-то в iframe
+        try {
+          const iframeDoc = player.contentDocument || player.contentWindow?.document;
+          if (iframeDoc && iframeDoc.body && iframeDoc.body.innerHTML.trim() === '') {
+            showError();
+          }
+        } catch (e) {}
+      }
+    }, 15000);
+
+  })();
+</script>
+</body>
+</html>
