@@ -3,93 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мульт ТВ — Эфир</title>
+    <title>Мульт ТВ — Прямой эфир</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* Глобальные сбросы и шрифты */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            text-align: center;
+            background: radial-gradient(circle at 20% 20%, #1a1f35, #0b0e1a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
             padding: 20px;
-            margin: 0;
         }
-        h1 {
-            font-size: 3.5rem;
-            color: #f7c948;
-            text-shadow: 0 0 20px rgba(247, 201, 72, 0.3);
-            letter-spacing: 2px;
-            margin-top: 10px;
-            margin-bottom: 5px;
+
+        /* Основной контейнер */
+        .tv-wrapper {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 28px 28px 35px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 2px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.3s;
+        }
+
+        /* Шапка */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px 20px;
+            margin-bottom: 18px;
+        }
+        .channel-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .channel-title h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f7c948, #f5a623);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(247, 201, 72, 0.2);
+            letter-spacing: -0.5px;
         }
         .live-badge {
-            background-color: #ef4444;
+            background: #ef4444;
             color: white;
+            font-weight: 700;
+            font-size: 0.8rem;
             padding: 4px 14px;
-            font-weight: bold;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-bottom: 10px;
+            border-radius: 20px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
             animation: blink 1.5s infinite;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
         }
-        @keyframes blink { 50% { opacity: 0.5; } }
-        .subtitle {
-            font-size: 1.2rem;
+        @keyframes blink { 50% { opacity: 0.4; } }
+
+        .online-counter {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(4px);
+            padding: 6px 18px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.95rem;
             color: #94a3b8;
-            margin-bottom: 20px;
-            font-weight: 500;
-            min-height: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+        .online-number {
+            color: #22c55e;
+            font-weight: 700;
+            text-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Плеер */
         .video-container {
             position: relative;
-            width: 850px;
-            max-width: 100%;
-            height: 480px;
-            margin: 0 auto;
+            width: 100%;
+            aspect-ratio: 16 / 9;
             background: #000;
-            border-radius: 12px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
         }
         iframe {
             width: 100% !important;
-            height: 480px !important;
+            height: 100% !important;
             border: none;
             display: block;
-            /* Отключаем все взаимодействия с плеером — интерфейс YouTube не появится */
-            pointer-events: none;
+            pointer-events: none; /* полное отключение интерфейса YouTube */
         }
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .btn {
-            background-color: #0284c7;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .btn:hover { background-color: #0369a1; transform: translateY(-1px); }
-        
-        /* Логотип канала — правый нижний угол */
+
+        /* Логотип канала (правый нижний угол) */
         .tv-badge {
             position: absolute;
-            bottom: 18px;
-            right: 18px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(3px);
-            padding: 6px 16px;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(8px);
+            padding: 8px 18px 8px 14px;
             border-radius: 40px;
             border-left: 4px solid #f7c948;
             color: white;
@@ -99,198 +120,249 @@
             pointer-events: none;
             display: flex;
             align-items: center;
-            gap: 8px;
-            opacity: 0.85;
+            gap: 10px;
+            opacity: 0.9;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
-        .tv-badge span {
-            background: #f7c948;
+        .tv-badge .dot {
             width: 10px;
             height: 10px;
+            background: #f7c948;
             border-radius: 50%;
             display: inline-block;
             animation: pulse-dot 1.6s infinite;
         }
         @keyframes pulse-dot {
-            0% { opacity: 0.5; transform: scale(0.8); }
+            0% { opacity: 0.4; transform: scale(0.8); }
             50% { opacity: 1; transform: scale(1.2); }
-            100% { opacity: 0.5; transform: scale(0.8); }
+            100% { opacity: 0.4; transform: scale(0.8); }
         }
-        .online-counter {
-            margin-top: 30px;
-            font-size: 1.1rem;
-            color: #94a3b8;
-            background: #1e293b;
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 20px;
-            border: 1px solid #334155;
+
+        /* Информация о текущем эфире */
+        .subtitle {
+            margin-top: 16px;
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            font-weight: 500;
+            text-align: center;
+            min-height: 2.2rem;
+            letter-spacing: 0.3px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
-        .online-number {
-            color: #22c55e;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+
+        /* Управление */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 22px;
         }
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #f1f5f9;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+            border-color: rgba(247, 201, 72, 0.3);
+        }
+        .btn:active {
+            transform: translateY(0px);
+        }
+
+        /* Адаптив */
         @media (max-width: 600px) {
-            h1 { font-size: 2.2rem; }
-            .video-container { height: 280px; }
-            iframe { height: 280px !important; }
-            .controls .btn { padding: 8px 16px; font-size: 0.8rem; }
-            .tv-badge { font-size: 0.7rem; padding: 4px 12px; bottom: 10px; right: 10px; }
+            .tv-wrapper { padding: 16px; border-radius: 32px; }
+            .channel-title h1 { font-size: 2rem; }
+            .online-counter { font-size: 0.8rem; padding: 4px 14px; }
+            .tv-badge { font-size: 0.7rem; padding: 4px 12px; bottom: 12px; right: 12px; }
+            .controls .btn { padding: 8px 18px; font-size: 0.85rem; }
+            .subtitle { font-size: 1rem; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Мульт ТВ</h1>
-    <div class="live-badge">Прямой эфир</div>
-    <div class="subtitle" id="currentTrack">Загрузка эфира...</div>
+<div class="tv-wrapper">
+    <!-- Шапка -->
+    <div class="header">
+        <div class="channel-title">
+            <h1>Мульт ТВ</h1>
+            <span class="live-badge">Прямой эфир</span>
+        </div>
+        <div class="online-counter">
+            👀 <span class="online-number" id="onlineCount">Загрузка...</span> чел.
+        </div>
+    </div>
 
+    <!-- Плеер -->
     <div class="video-container" id="videoContainer">
-        <div class="tv-badge"><span></span> Мульт ТВ</div>
+        <div class="tv-badge">
+            <span class="dot"></span> Мульт ТВ
+        </div>
         <iframe id="tv-player" allow="autoplay; fullscreen" allowfullscreen></iframe>
     </div>
 
+    <!-- Строка с названием текущего видео -->
+    <div class="subtitle" id="currentTrack">Загрузка эфира...</div>
+
+    <!-- Кнопки управления -->
     <div class="controls">
-        <button class="btn" id="muteBtn">🔇 Включить звук</button>
+        <button class="btn" id="muteBtn">🔇 Выключить звук</button>
         <button class="btn" id="fullscreenBtn">📺 Полный экран</button>
     </div>
+</div>
 
-    <div class="online-counter">
-        👀 Онлайн: <span class="online-number" id="onlineCount">Загрузка...</span> чел.
-    </div>
+<script>
+    // ================================================================
+    //  👇👇👇  СЮДА ВСТАВЛЯЙТЕ СВОИ ВИДЕО  👇👇👇
+    //  Формат: { id: 'КОД_ИЗ_ССЫЛКИ', title: 'Название', duration: СЕКУНДЫ }
+    // ================================================================
+    const playlist = [
+        // Примеры (замените на свои фильмы):
+        { id: 'byMMXeq0CcQ', title: 'Рик и Морти', duration: 1440 },
+        { id: '_23N3DmBRXk', title: 'Маша и Медведь', duration: 4264 },
+        { id: 'J5S3tU_mbi0', title: 'Симпсоны', duration: 3591 }
+    ];
 
-    <script>
-        // ================================================================
-        //  👇👇👇  СЮДА ВСТАВЛЯЙТЕ СВОИ ВИДЕО  👇👇👇
-        // ================================================================
-        const playlist = [
-            // Примеры (замените на свои):
-            { id: 'byMMXeq0CcQ', title: 'Рик и Морти', duration: 1440 },
-            { id: '_23N3DmBRXk', title: 'Маша и Медведь', duration: 4264 },
-            { id: 'J5S3tU_mbi0', title: 'Симпсоны', duration: 3591 }
-        ];
+    // ================================================================
+    //  ЗАСТАВКА (показывается каждые 5 минут)
+    //  Длительность 5 секунд
+    // ================================================================
+    const introId = 'UJOG59hELH8';   // ваша заставка
+    const introDuration = 5;         // ровно 5 секунд
 
-        // ================================================================
-        //  ЗАСТАВКА (показывается каждые 5 минут)
-        //  Длительность заставки — 5 секунд
-        // ================================================================
-        const introId = 'UJOG59hELH8';   // ваша заставка
-        const introDuration = 5;         // теперь ровно 5 секунд
+    // ================================================================
+    //  НИЖЕ НИЧЕГО НЕ ТРОГАЙТЕ
+    // ================================================================
 
-        // ================================================================
-        //  НИЖЕ НИЧЕГО НЕ ТРОГАЙТЕ
-        // ================================================================
+    // Звук включен по умолчанию
+    let isMuted = false;  // <-- теперь звук сразу включён
 
-        const totalDuration = playlist.reduce((sum, item) => sum + item.duration, 0);
-        const hasPlaylist = playlist.length > 0;
+    const totalDuration = playlist.reduce((sum, item) => sum + item.duration, 0);
+    const hasPlaylist = playlist.length > 0;
 
-        let isMuted = true;
-        let lastLoadedVideoId = "";
-        const player = document.getElementById('tv-player');
-        const currentTrack = document.getElementById('currentTrack');
+    let lastLoadedVideoId = "";
+    const player = document.getElementById('tv-player');
+    const currentTrack = document.getElementById('currentTrack');
+    const muteBtn = document.getElementById('muteBtn');
 
-        function getVideoUrl(id, start = 0) {
-            const muteParam = isMuted ? 1 : 0;
-            // Добавим параметры для скрытия интерфейса
-            return `https://www.youtube.com/embed/${id}?autoplay=1&start=${start}&mute=${muteParam}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&disablekb=1&fs=0&playsinline=1`;
+    // Функция формирования URL без mute (если звук включён)
+    function getVideoUrl(id, start = 0) {
+        const muteParam = isMuted ? 1 : 0;
+        return `https://www.youtube.com/embed/${id}?autoplay=1&start=${start}&mute=${muteParam}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&disablekb=1&fs=0&playsinline=1`;
+    }
+
+    function loadVideo(id, start = 0, title = '') {
+        if (lastLoadedVideoId !== id) {
+            lastLoadedVideoId = id;
+            player.src = getVideoUrl(id, start);
+            if (title) currentTrack.textContent = title;
+        }
+    }
+
+    function updateBroadcast() {
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+
+        // Заставка каждые 5 минут, только первые 5 секунд
+        if (hasPlaylist && minutes % 5 === 0 && seconds < introDuration) {
+            loadVideo(introId, 0, '📺 Заставка Мульт ТВ');
+            return;
         }
 
-        function loadVideo(id, start = 0, title = '') {
-            if (lastLoadedVideoId !== id) {
-                lastLoadedVideoId = id;
-                player.src = getVideoUrl(id, start);
-                if (title) currentTrack.textContent = title;
-            }
+        if (!hasPlaylist) {
+            currentTrack.textContent = 'Добавьте видео в плейлист!';
+            return;
         }
 
-        function updateBroadcast() {
-            const now = new Date();
-            const minutes = now.getMinutes();
-            const seconds = now.getSeconds();
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        let timeInCycle = currentTimestamp % totalDuration;
+        let currentMovie = null;
 
-            // Заставка каждые 5 минут, только 5 секунд
-            if (hasPlaylist && minutes % 5 === 0 && seconds < introDuration) {
-                loadVideo(introId, 0, '📺 Заставка Мульт ТВ');
-                return;
+        for (let i = 0; i < playlist.length; i++) {
+            if (timeInCycle < playlist[i].duration) {
+                currentMovie = {
+                    id: playlist[i].id,
+                    title: playlist[i].title,
+                    startFrom: Math.floor(timeInCycle)
+                };
+                break;
             }
-
-            if (!hasPlaylist) {
-                currentTrack.textContent = 'Добавьте видео в плейлист!';
-                return;
-            }
-
-            const currentTimestamp = Math.floor(Date.now() / 1000);
-            let timeInCycle = currentTimestamp % totalDuration;
-            let currentMovie = null;
-
-            for (let i = 0; i < playlist.length; i++) {
-                if (timeInCycle < playlist[i].duration) {
-                    currentMovie = {
-                        id: playlist[i].id,
-                        title: playlist[i].title,
-                        startFrom: Math.floor(timeInCycle)
-                    };
-                    break;
-                }
-                timeInCycle -= playlist[i].duration;
-            }
-
-            if (currentMovie) {
-                loadVideo(currentMovie.id, currentMovie.startFrom, 'Сейчас в эфире: ' + currentMovie.title);
-            }
+            timeInCycle -= playlist[i].duration;
         }
 
-        // Счётчик зрителей
-        function initOnlineCounter() {
-            if (!sessionStorage.getItem('multtv_device_token')) {
-                const token = Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
-                sessionStorage.setItem('multtv_device_token', token);
-            }
-            const deviceToken = sessionStorage.getItem('multtv_device_token');
-            const counterUrl = `https://leandrosn.com${deviceToken}`;
-
-            function fetchCount() {
-                fetch(counterUrl)
-                    .then(res => res.json())
-                    .then(data => {
-                        document.getElementById('onlineCount').textContent = data.online || 1;
-                    })
-                    .catch(() => {
-                        document.getElementById('onlineCount').textContent = Math.floor(Math.random() * 5) + 1;
-                    });
-            }
-            fetchCount();
-            setInterval(fetchCount, 5000);
+        if (currentMovie) {
+            loadVideo(currentMovie.id, currentMovie.startFrom, 'Сейчас в эфире: ' + currentMovie.title);
         }
-        initOnlineCounter();
+    }
 
-        // Запуск
-        updateBroadcast();
-        setInterval(updateBroadcast, 1000);
+    // Счётчик зрителей
+    function initOnlineCounter() {
+        if (!sessionStorage.getItem('multtv_device_token')) {
+            const token = Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+            sessionStorage.setItem('multtv_device_token', token);
+        }
+        const deviceToken = sessionStorage.getItem('multtv_device_token');
+        const counterUrl = `https://leandrosn.com${deviceToken}`;
 
-        // Звук
-        document.getElementById('muteBtn').addEventListener('click', function() {
-            isMuted = !isMuted;
-            this.innerHTML = isMuted ? "🔇 Включить звук" : "🔊 Выключить звук";
-            const currentSrc = player.src;
-            if (currentSrc) {
-                const url = new URL(currentSrc);
-                url.searchParams.set('mute', isMuted ? '1' : '0');
-                player.src = url.toString();
-            }
-        });
-
-        // Полный экран
-        document.getElementById('fullscreenBtn').addEventListener('click', function() {
-            const container = document.getElementById('videoContainer');
-            if (!document.fullscreenElement) {
-                container.requestFullscreen().catch(err => {
-                    alert('Ошибка: ' + err.message);
+        function fetchCount() {
+            fetch(counterUrl)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('onlineCount').textContent = data.online || 1;
+                })
+                .catch(() => {
+                    document.getElementById('onlineCount').textContent = Math.floor(Math.random() * 5) + 1;
                 });
-            } else {
-                document.exitFullscreen();
-            }
-        });
-    </script>
+        }
+        fetchCount();
+        setInterval(fetchCount, 5000);
+    }
+    initOnlineCounter();
+
+    // Запуск эфира
+    updateBroadcast();
+    setInterval(updateBroadcast, 1000);
+
+    // Управление звуком (кнопка)
+    muteBtn.addEventListener('click', function() {
+        isMuted = !isMuted;
+        this.innerHTML = isMuted ? "🔇 Включить звук" : "🔊 Выключить звук";
+        // Перезагружаем текущее видео с новым mute-параметром
+        const currentSrc = player.src;
+        if (currentSrc) {
+            const url = new URL(currentSrc);
+            url.searchParams.set('mute', isMuted ? '1' : '0');
+            player.src = url.toString();
+        }
+    });
+
+    // Полный экран
+    document.getElementById('fullscreenBtn').addEventListener('click', function() {
+        const container = document.getElementById('videoContainer');
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(err => {
+                alert('Ошибка: ' + err.message);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    });
+</script>
 </body>
 </html>
