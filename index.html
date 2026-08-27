@@ -1,475 +1,624 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Мульт ТВ — Прямой эфир</title>
+
+    <!-- =========================================================== -->
+    <!-- 1. ЗАЩИТА ОТ ИНСТРУМЕНТОВ РАЗРАБОТЧИКА                        -->
+    <!-- =========================================================== -->
+    <script>
+        (function() {
+            'use strict';
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F12') { e.preventDefault(); e.stopPropagation(); return false; }
+                if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if (e.ctrlKey && (e.key === 'U' || e.key === 'S' || e.key === 'P')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if (e.key === 'F1') { e.preventDefault(); return false; }
+            }, true);
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            }, true);
+            window.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.shiftKey) { e.preventDefault(); return false; }
+                if (e.metaKey && e.altKey && e.key === 'I') { e.preventDefault(); return false; }
+                if (e.key === 'F12') { e.preventDefault(); return false; }
+            }, true);
+            window.addEventListener('keyup', function(e) {
+                if (e.key === 'F12') { e.preventDefault(); return false; }
+            }, true);
+            console.log('🛡️ Защита активирована');
+        })();
+    </script>
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* =========================================================== */
+        /* 2. СТИЛИ (ТОТ ЖЕ ИНТЕРФЕЙС, ЧТО У ВЕТРА)                  */
+        /* =========================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-main: #020617;
+            --panel-bg: rgba(15, 23, 42, 0.45);
+            --accent: #f7c948;
+            --accent-glow: rgba(247, 201, 72, 0.25);
+            --text-main: #f8fafc;
+        }
+
         body {
-            background: radial-gradient(circle at 20% 20%, #1a1f35, #0b0e1a);
+            background-color: var(--bg-main);
+            background-image:
+                radial-gradient(circle at 80% 20%, rgba(247, 201, 72, 0.10) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.10) 0%, transparent 50%);
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             display: flex;
+            align-items: center;
             justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
             padding: 20px;
+            user-select: none;
+            -webkit-user-select: none;
         }
-        .tv-wrapper {
-            max-width: 900px;
+
+        .cinema-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border-radius: 48px;
-            padding: 28px 28px 35px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 2px 0 rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            max-width: 1150px;
         }
-        .header {
+
+        @media (max-width: 900px) {
+            .cinema-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .video-section {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .main-theater {
+            position: relative;
+            background: #000;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 50px var(--accent-glow);
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .main-theater iframe,
+        .main-theater #yt-iframe-placeholder {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .shield {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            cursor: default;
+            pointer-events: auto;
+            background: transparent;
+        }
+
+        .side-dashboard {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px 20px;
-            margin-bottom: 18px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
-        .channel-title {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .channel-title h1 {
-            font-size: 2.8rem;
+
+        .station-info h1 {
+            font-size: 28px;
             font-weight: 800;
-            background: linear-gradient(135deg, #f7c948, #f5a623);
+            letter-spacing: 2px;
+            margin: 12px 0 0 0;
+            background: linear-gradient(135deg, #fff 40%, var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(247, 201, 72, 0.2);
-            letter-spacing: -0.5px;
         }
-        .live-badge {
-            background: #ef4444;
-            color: white;
+
+        .badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 11px;
             font-weight: 700;
-            font-size: 0.8rem;
-            padding: 4px 14px;
-            border-radius: 20px;
             text-transform: uppercase;
-            animation: blink 1.5s infinite;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+            letter-spacing: 1px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
-        @keyframes blink { 50% { opacity: 0.4; } }
-        .online-counter {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(4px);
-            padding: 6px 18px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            font-size: 0.95rem;
-            color: #94a3b8;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .online-number {
-            color: #22c55e;
-            font-weight: 700;
-            text-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
-        }
-        .video-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #000;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-        }
-        iframe {
-            width: 100% !important;
-            height: 100% !important;
-            border: none;
-            display: block;
-            pointer-events: none;
-        }
-        .tv-badge {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(8px);
-            padding: 8px 18px 8px 14px;
-            border-radius: 40px;
-            border-left: 4px solid #f7c948;
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-            z-index: 35;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            opacity: 0.9;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-        .tv-badge .dot {
-            width: 10px;
-            height: 10px;
-            background: #f7c948;
+
+        .pulse-ring {
+            width: 6px;
+            height: 6px;
+            background: #ef4444;
             border-radius: 50%;
-            display: inline-block;
-            animation: pulse-dot 1.6s infinite;
+            animation: live-glow 1.5s infinite;
         }
-        @keyframes pulse-dot {
-            0% { opacity: 0.4; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); }
-            100% { opacity: 0.4; transform: scale(0.8); }
+
+        @keyframes live-glow {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-        .subtitle {
-            margin-top: 16px;
-            font-size: 1.2rem;
-            color: #cbd5e1;
-            font-weight: 500;
-            text-align: center;
-            min-height: 2.2rem;
-            letter-spacing: 0.3px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+
+        .meta-list {
+            margin: 20px 0;
+            padding: 0;
+            list-style: none;
+            font-size: 13px;
+            color: #94a3b8;
         }
-        .controls {
+
+        .meta-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             display: flex;
-            justify-content: center;
-            gap: 18px;
-            flex-wrap: wrap;
-            margin-top: 22px;
+            justify-content: space-between;
         }
-        .btn {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+
+        .meta-list strong {
             color: #f1f5f9;
-            padding: 12px 28px;
-            font-size: 1rem;
+        }
+
+        .announce-block {
+            margin: 12px 0 16px;
+            padding: 12px 16px;
+            background: rgba(247, 201, 72, 0.08);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .announce-block .announce-title {
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .announce-block .announce-desc {
+            color: #cbd5e1;
+            margin-top: 4px;
+        }
+        .announce-block .announce-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: var(--accent);
+            text-decoration: none;
             font-weight: 600;
-            border-radius: 40px;
+            border: 1px solid rgba(247, 201, 72, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .announce-block .announce-link:hover {
+            background: rgba(247, 201, 72, 0.15);
+            border-color: var(--accent);
+        }
+
+        .action-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-modern {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-            transform: translateY(-2px);
-            border-color: rgba(247, 201, 72, 0.3);
-        }
-        .btn:active { transform: translateY(0px); }
-
-        /* Программа передач */
-        .schedule-block {
-            margin-top: 24px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(4px);
-            border-radius: 20px;
-            padding: 16px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .schedule-title {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-        .schedule-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-            color: #e2e8f0;
-            font-size: 0.9rem;
-        }
-        .schedule-item {
-            display: flex;
-            align-items: center;
+            justify-content: center;
             gap: 8px;
         }
-        .schedule-time {
-            font-weight: 700;
-            color: #f7c948;
-            min-width: 55px;
+
+        .btn-modern:hover {
+            background: rgba(247, 201, 72, 0.08);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 20px rgba(247, 201, 72, 0.15);
         }
-        .schedule-title-name {
-            color: #cbd5e1;
+
+        .btn-glow {
+            background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
+            border: none;
         }
-        .schedule-item.active {
-            background: rgba(247, 201, 72, 0.15);
-            padding: 2px 12px;
-            border-radius: 30px;
-            border-left: 3px solid #f7c948;
-        }
-        .schedule-item.active .schedule-title-name {
-            color: #f7c948;
-        }
-        @media (max-width: 600px) {
-            .tv-wrapper { padding: 16px; border-radius: 32px; }
-            .channel-title h1 { font-size: 2rem; }
-            .online-counter { font-size: 0.8rem; padding: 4px 14px; }
-            .tv-badge { font-size: 0.7rem; padding: 4px 12px; bottom: 12px; right: 12px; }
-            .controls .btn { padding: 8px 18px; font-size: 0.85rem; }
-            .subtitle { font-size: 1rem; }
-            .schedule-list { font-size: 0.8rem; gap: 8px; }
+
+        .btn-glow:hover {
+            background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+            color: #fff;
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.35);
         }
     </style>
 </head>
 <body>
 
-<div class="tv-wrapper">
-    <div class="header">
-        <div class="channel-title">
-            <h1>Мульт ТВ</h1>
-            <span class="live-badge">Прямой эфир</span>
+    <div class="cinema-grid">
+
+        <!-- ЛЕВАЯ КОЛОНКА: ПЛЕЕР -->
+        <div class="video-section">
+            <div class="main-theater" id="playerContainer">
+                <div class="shield" id="shield"></div>
+            </div>
         </div>
-        <div class="online-counter">
-            👀 <span class="online-number" id="onlineCount">Загрузка...</span> чел.
+
+        <!-- ПРАВАЯ КОЛОНКА: ИНФО + КНОПКИ -->
+        <div class="side-dashboard">
+            <div class="station-info">
+                <div class="badge-live">
+                    <div class="pulse-ring"></div>
+                    Эфир
+                </div>
+                <h1>Мульт ТВ</h1>
+
+                <ul class="meta-list">
+                    <li>Сейчас в эфире: <strong id="currentShowTitle">Загрузка...</strong></li>
+                    <li>Качество: <strong>Ultra HD 4K</strong></li>
+                    <li>Онлайн: <strong><span id="onlineCount">0</span> чел.</strong></li>
+                </ul>
+
+                <!-- БЛОК АНОНСА — СЕГОДНЯ В 13:00 -->
+                <div class="announce-block">
+                    <div class="announce-title">⭐ СЕГОДНЯ В 13:00</div>
+                    <div class="announce-desc">
+                        <strong>«Человек-паук: Совершенно новый день»</strong>
+                    </div>
+                    <a class="announce-link" href="https://youtu.be/dT4Ikxceg7A" target="_blank">▶ Смотреть трейлер</a>
+                    <!-- замени ВАШ_ID_ВИДЕО на реальный ID -->
+                </div>
+            </div>
+
+            <div class="action-container">
+                <button class="btn-modern btn-glow" id="mute-btn">🔇 Выключить звук</button>
+                <button class="btn-modern" id="fs-btn">📺 Полный экран</button>
+            </div>
         </div>
     </div>
 
-    <div class="video-container" id="videoContainer">
-        <div class="tv-badge"><span class="dot"></span> Мульт ТВ</div>
-        <iframe id="tv-player" allow="autoplay; fullscreen" allowfullscreen></iframe>
-    </div>
-
-    <div class="subtitle" id="currentTrack">Загрузка эфира...</div>
-
-    <div class="controls">
-        <button class="btn" id="muteBtn">🔇 Выключить звук</button>
-        <button class="btn" id="fullscreenBtn">📺 Полный экран</button>
-    </div>
-
-    <!-- Блок расписания -->
-    <div class="schedule-block">
-        <div class="schedule-title">📅 Программа передач</div>
-        <div class="schedule-list" id="scheduleList">
-            <!-- заполняется через JavaScript -->
-        </div>
-    </div>
-</div>
-
+    <!-- =========================================================== -->
+    <!-- 4. ПОДКЛЮЧЕНИЕ YOUTUBE API                                  -->
+    <!-- =========================================================== -->
+    <script src="https://www.youtube.com/iframe_api">
+    </script>
+                    <!-- =========================================================== -->
+<!-- 5. ОСНОВНОЙ СКРИПТ                                          -->
+<!-- =========================================================== -->
 <script>
-    // ================================================================
-    //  ╔══════════════════════════════════════════════════════════════╗
-    //  ║  РАСПИСАНИЕ (добавьте свои события)                       ║
-    //  ║  Формат: { time: 'ЧЧ:ММ', id: 'ID_ВИДЕО', title: 'Название', duration: СЕК } ║
-    //  ║  duration — длительность фильма (чтобы знать, когда он закончится) ║
-    //  ╚══════════════════════════════════════════════════════════════╝
-    // ================================================================
-    const scheduledEvents = [
-        // Пример: завтра в 13:00 показываем "Человек-паук: Совершенно новый день"
-        // (вставьте реальный ID видео и длительность)
-        { time: '13:00', id: 'YOUR_SPIDERMAN_VIDEO_ID', title: 'Человек-паук: Совершенно новый день', duration: 7200 },
-        // Можно добавить другие события
-        // { time: '18:00', id: 'ANOTHER_VIDEO_ID', title: 'Ещё фильм', duration: 5400 }
-    ];
-
-    // ================================================================
-    //  ПЛЕЙЛИСТ (обычный эфир, когда нет запланированных событий)
-    // ================================================================
+    // ============================================================
+    // 📋 ТВОЙ ПЛЕЙЛИСТ (Смешарики) с длительностью в секундах
+    // ============================================================
     const playlist = [
-        { id: 'byMMXeq0CcQ', title: 'Рик и Морти', duration: 1440 },
-        { id: '_23N3DmBRXk', title: 'Маша и Медведь', duration: 4264 },
-        { id: 'J5S3tU_mbi0', title: 'Симпсоны', duration: 3591 }
+        { id: 'Lu0pj1L6mL8', title: 'Смешарики Лучшие серии', duration: 3600 },
+        { id: '1vBgKm9qhhM', title: 'Смешарики Прощяемся с летом 2026', duration: 3600 },
+        { id: 'gs-MZg77o6w', title: 'Смешарики Сборник', duration: 3600 }
     ];
 
-    // ================================================================
-    //  ЗАСТАВКА (показывается каждые 5 минут, длится 5 секунд)
-    // ================================================================
-    const introId = 'UJOG59hELH8';
-    const introDuration = 5;
+    // ============================================================
+    // 📅 РАСПИСАНИЕ: сегодня в 13:00 — Человек-паук
+    // ============================================================
+    const scheduledEvent = {
+        videoId: 'Jwi1Y7fK_t4',
+        title: 'Человек-паук: Совершенно новый день',
+        timeMinutes: 13 * 60, // 13:00
+        durationMinutes: 145  // 2 часа (можно поправить)
+    };
 
-    // ================================================================
-    //  НИЖЕ НИЧЕГО НЕ ТРОГАЙТЕ
-    // ================================================================
+    // ============================================================
+    // 🧠 ПЕРЕМЕННЫЕ
+    // ============================================================
+    let currentTrackIndex = 0;
+    let isMuted = false; // звук включён по умолчанию
+    let player = null;
+    let playerReady = false;
+    let savedTime = 0;
+    let isScheduledActive = false;
+    let scheduleCheckInterval = null;
 
-    let isMuted = false;  // звук включён по умолчанию
-    let lastLoadedVideoId = "";
-    const player = document.getElementById('tv-player');
-    const currentTrack = document.getElementById('currentTrack');
-    const muteBtn = document.getElementById('muteBtn');
-
-    const totalDuration = playlist.reduce((sum, item) => sum + item.duration, 0);
-    const hasPlaylist = playlist.length > 0;
-
-    // Функция для получения текущего времени в минутах от полуночи
-    function getCurrentTimeMinutes() {
-        const now = new Date();
-        return now.getHours() * 60 + now.getMinutes();
-    }
-
-    // Проверка, есть ли активное запланированное событие
-    function getActiveScheduledEvent() {
-        const now = new Date();
-        const currentMin = getCurrentTimeMinutes();
-        // Проходим по событиям
-        for (let ev of scheduledEvents) {
-            const [h, m] = ev.time.split(':').map(Number);
-            const eventMin = h * 60 + m;
-            // Если текущее время >= время начала и < время начала + duration (в минутах)
-            const endMin = eventMin + Math.ceil(ev.duration / 60);
-            if (currentMin >= eventMin && currentMin < endMin) {
-                return ev;
-            }
-        }
-        return null;
-    }
-
-    function getVideoUrl(id, start = 0) {
-        const muteParam = isMuted ? 1 : 0;
-        return `https://www.youtube.com/embed/${id}?autoplay=1&start=${start}&mute=${muteParam}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&disablekb=1&fs=0&playsinline=1`;
-    }
-
-    function loadVideo(id, start = 0, title = '') {
-        if (lastLoadedVideoId !== id) {
-            lastLoadedVideoId = id;
-            player.src = getVideoUrl(id, start);
-            if (title) currentTrack.textContent = title;
+    // ============================================================
+    // ⏳ ВОССТАНОВЛЕНИЕ ВРЕМЕНИ ПРИ ПЕРЕЗАГРУЗКЕ
+    // ============================================================
+    function loadSavedState() {
+        const saved = localStorage.getItem('multtv_state');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.trackIndex !== undefined) {
+                    currentTrackIndex = data.trackIndex % playlist.length;
+                }
+                if (data.time) {
+                    savedTime = parseFloat(data.time) || 0;
+                }
+            } catch (e) { /* тихо */ }
         }
     }
 
-    function updateBroadcast() {
-        const now = new Date();
-        const minutes = now.getMinutes();
-        const seconds = now.getSeconds();
-
-        // 1. Проверяем запланированное событие
-        const activeEvent = getActiveScheduledEvent();
-        if (activeEvent) {
-            // Рассчитываем, сколько секунд прошло с начала события
-            const [h, m] = activeEvent.time.split(':').map(Number);
-            const eventStartSec = h * 3600 + m * 60;
-            const currentSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-            let elapsed = currentSec - eventStartSec;
-            if (elapsed < 0) elapsed = 0;
-            // Если видео ещё не загружено или другое, загружаем с нужным таймкодом
-            const title = '📽️ ' + activeEvent.title;
-            loadVideo(activeEvent.id, elapsed, title);
-            return;
-        }
-
-        // 2. Заставка каждые 5 минут (только если нет активного события)
-        if (hasPlaylist && minutes % 5 === 0 && seconds < introDuration) {
-            loadVideo(introId, 0, '📺 Заставка Мульт ТВ');
-            return;
-        }
-
-        // 3. Обычный эфир
-        if (!hasPlaylist) {
-            currentTrack.textContent = 'Добавьте видео в плейлист!';
-            return;
-        }
-
-        const currentTimestamp = Math.floor(Date.now() / 1000);
-        let timeInCycle = currentTimestamp % totalDuration;
-        let currentMovie = null;
-
-        for (let i = 0; i < playlist.length; i++) {
-            if (timeInCycle < playlist[i].duration) {
-                currentMovie = {
-                    id: playlist[i].id,
-                    title: playlist[i].title,
-                    startFrom: Math.floor(timeInCycle)
-                };
-                break;
-            }
-            timeInCycle -= playlist[i].duration;
-        }
-
-        if (currentMovie) {
-            loadVideo(currentMovie.id, currentMovie.startFrom, 'Сейчас в эфире: ' + currentMovie.title);
-        }
+    function saveCurrentState(time) {
+        try {
+            localStorage.setItem('multtv_state', JSON.stringify({
+                trackIndex: currentTrackIndex,
+                time: time || 0
+            }));
+        } catch (e) { /* тихо */ }
     }
 
-    // Обновление отображения расписания
-    function renderSchedule() {
-        const scheduleList = document.getElementById('scheduleList');
-        const now = new Date();
-        const currentMin = getCurrentTimeMinutes();
-        let html = '';
-        // Сортируем события по времени
-        const sorted = [...scheduledEvents].sort((a, b) => {
-            const [h1, m1] = a.time.split(':').map(Number);
-            const [h2, m2] = b.time.split(':').map(Number);
-            return (h1*60+m1) - (h2*60+m2);
-        });
-        for (let ev of sorted) {
-            const [h, m] = ev.time.split(':').map(Number);
-            const eventMin = h * 60 + m;
-            const endMin = eventMin + Math.ceil(ev.duration / 60);
-            const isActive = (currentMin >= eventMin && currentMin < endMin);
-            const activeClass = isActive ? 'active' : '';
-            html += `<div class="schedule-item ${activeClass}">
-                        <span class="schedule-time">${ev.time}</span>
-                        <span class="schedule-title-name">${ev.title}</span>
-                     </div>`;
-        }
-        if (sorted.length === 0) {
-            html = '<span style="color:#64748b;">Нет запланированных передач</span>';
-        }
-        scheduleList.innerHTML = html;
+    // ============================================================
+    // 🚀 СОЗДАНИЕ ПЛЕЕРА
+    // ============================================================
+    function onYouTubeIframeAPIReady() {
+        playerReady = true;
+        loadSavedState();
+        createPlayer();
     }
 
-    // Счётчик зрителей
-    function initOnlineCounter() {
-        if (!sessionStorage.getItem('multtv_device_token')) {
-            const token = Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
-            sessionStorage.setItem('multtv_device_token', token);
-        }
-        const deviceToken = sessionStorage.getItem('multtv_device_token');
-        const counterUrl = `https://leandrosn.com${deviceToken}`;
+    function createPlayer(videoId, startTime = 0, title = null) {
+        if (!playerReady) return;
 
-        function fetchCount() {
-            fetch(counterUrl)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('onlineCount').textContent = data.online || 1;
-                })
-                .catch(() => {
-                    document.getElementById('onlineCount').textContent = Math.floor(Math.random() * 5) + 1;
-                });
-        }
-        fetchCount();
-        setInterval(fetchCount, 5000);
-    }
-    initOnlineCounter();
+        const id = videoId || playlist[currentTrackIndex].id;
+        const displayTitle = title || playlist[currentTrackIndex].title;
+        document.getElementById('currentShowTitle').textContent = displayTitle;
 
-    // Запускаем обновление эфира и расписания
-    updateBroadcast();
-    setInterval(updateBroadcast, 1000);
-    renderSchedule();
-    setInterval(renderSchedule, 10000); // обновление расписания каждые 10 секунд
+        const container = document.getElementById('playerContainer');
+        container.innerHTML = '<div id="yt-iframe-placeholder"></div>';
 
-    // Управление звуком
-    muteBtn.addEventListener('click', function() {
-        isMuted = !isMuted;
-        this.innerHTML = isMuted ? "🔇 Включить звук" : "🔊 Выключить звук";
-        const currentSrc = player.src;
-        if (currentSrc) {
-            const url = new URL(currentSrc);
-            url.searchParams.set('mute', isMuted ? '1' : '0');
-            player.src = url.toString();
-        }
-    });
+        const shield = document.createElement('div');
+        shield.className = 'shield';
+        shield.id = 'shield';
+        container.appendChild(shield);
 
-    // Полный экран
-    document.getElementById('fullscreenBtn').addEventListener('click', function() {
-        const container = document.getElementById('videoContainer');
-        if (!document.fullscreenElement) {
-            container.requestFullscreen().catch(err => {
-                alert('Ошибка: ' + err.message);
-            });
+        if (videoId === scheduledEvent.videoId) {
+            isScheduledActive = true;
         } else {
-            document.exitFullscreen();
+            isScheduledActive = false;
+        }
+
+        player = new YT.Player('yt-iframe-placeholder', {
+            height: '100%',
+            width: '100%',
+            videoId: id,
+            playerVars: {
+                autoplay: 1,
+                controls: 1,
+                rel: 0,
+                mute: isMuted ? 1 : 0,
+                start: Math.floor(startTime)
+            },
+            events: {
+                onStateChange: onPlayerStateChange,
+                onReady: onPlayerReady
+            }
+        });
+    }
+
+    // ============================================================
+    // ⏳ КОГДА ПЛЕЕР ГОТОВ — ВОССТАНАВЛИВАЕМ ВРЕМЯ
+    // ============================================================
+    function onPlayerReady(event) {
+        if (savedTime > 0 && !isScheduledActive) {
+            event.target.seekTo(savedTime, true);
+        }
+        setInterval(() => {
+            if (player && typeof player.getCurrentTime === 'function') {
+                const t = player.getCurrentTime();
+                if (t > 0) saveCurrentState(t);
+            }
+        }, 5000);
+    }
+
+    // ============================================================
+    // 🔄 ПРОВЕРКА РАСПИСАНИЯ (каждую секунду)
+    // ============================================================
+    function checkScheduleAndPlay() {
+        const now = new Date();
+        const minutes = now.getHours() * 60 + now.getMinutes();
+        const seconds = now.getSeconds();
+        const eventStart = scheduledEvent.timeMinutes;
+        const eventEnd = eventStart + scheduledEvent.durationMinutes;
+
+        // Обновляем анонс с обратным отсчётом
+        updateAnnouncement(minutes, seconds);
+
+        if (minutes >= eventStart && minutes < eventEnd) {
+            if (!isScheduledActive) {
+                const elapsedMinutes = minutes - eventStart;
+                const startSeconds = elapsedMinutes * 60 + seconds;
+                createPlayer(scheduledEvent.videoId, startSeconds, '📽️ ' + scheduledEvent.title);
+            }
+            return true;
+        } else {
+            if (isScheduledActive) {
+                isScheduledActive = false;
+                createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
+            }
+            return false;
+        }
+    }
+
+    // ============================================================
+    // 📢 ОБНОВЛЕНИЕ АНОНСА (обратный отсчёт до 13:00)
+    // ============================================================
+    function updateAnnouncement(currentMinutes, currentSeconds) {
+        const announceBlock = document.querySelector('.announce-block');
+        if (!announceBlock) return;
+
+        const targetMin = scheduledEvent.timeMinutes; // 780
+        const nowMin = currentMinutes;
+        const nowSec = currentSeconds;
+
+        // Если сейчас идёт Человек-паук
+        if (nowMin >= targetMin && nowMin < targetMin + scheduledEvent.durationMinutes) {
+            announceBlock.innerHTML = `
+                <div class="announce-title">🎬 СЕЙЧАС В ЭФИРЕ</div>
+                <div class="announce-desc"><strong>${scheduledEvent.title}</strong></div>
+            `;
+            return;
+        }
+
+        // Если Человек-паук уже прошёл (после 15:00)
+        if (nowMin >= targetMin + scheduledEvent.durationMinutes) {
+            announceBlock.innerHTML = `
+                <div class="announce-title">⭐ СЕГОДНЯ В 13:00</div>
+                <div class="announce-desc"><strong>${scheduledEvent.title}</strong> (уже прошёл)</div>
+            `;
+            return;
+        }
+
+        // Если до 13:00 осталось меньше 30 минут — показываем обратный отсчёт
+        const diffMinutes = targetMin - nowMin;
+        if (diffMinutes <= 30 && diffMinutes > 0) {
+            const totalSeconds = diffMinutes * 60 - nowSec;
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            announceBlock.innerHTML = `
+                <div class="announce-title">⏳ СКОРО В ЭФИРЕ</div>
+                <div class="announce-desc">
+                    <strong>${scheduledEvent.title}</strong><br>
+                    <span style="color: #f7c948; font-size: 1.1rem;">
+                        через ${mins} мин ${secs} сек
+                    </span>
+                </div>
+            `;
+        } else {
+            // Обычный анонс
+            announceBlock.innerHTML = `
+                <div class="announce-title">⭐ СЕГОДНЯ В 13:00</div>
+                <div class="announce-desc"><strong>${scheduledEvent.title}</strong></div>
+                <a class="announce-link" href="https://youtu.be/dT4Ikxceg7A" target="_blank">▶ Смотреть трейлер</a>
+            `;
+        }
+    }
+
+    // ============================================================
+    // ОБРАБОТКА СОСТОЯНИЙ ПЛЕЕРА
+    // ============================================================
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.ENDED) {
+            if (isScheduledActive) {
+                isScheduledActive = false;
+                currentTrackIndex = 0;
+                savedTime = 0;
+                saveCurrentState(0);
+                createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
+                return;
+            }
+
+            currentTrackIndex++;
+            if (currentTrackIndex >= playlist.length) {
+                currentTrackIndex = 0;
+            }
+            savedTime = 0;
+            saveCurrentState(0);
+            createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
+        }
+
+        if (event.data === YT.PlayerState.PAUSED) {
+            if (player && typeof player.getCurrentTime === 'function') {
+                saveCurrentState(player.getCurrentTime());
+            }
+        }
+    }
+
+    // ============================================================
+    // 🔊 КНОПКА ЗВУКА
+    // ============================================================
+    document.getElementById('mute-btn').addEventListener('click', function() {
+        if (player && typeof player.mute === 'function') {
+            isMuted = !isMuted;
+            if (isMuted) {
+                player.mute();
+                this.textContent = '🔊 Включить звук';
+            } else {
+                player.unMute();
+                this.textContent = '🔇 Выключить звук';
+            }
         }
     });
+
+    // ============================================================
+    // 📺 ПОЛНЫЙ ЭКРАН
+    // ============================================================
+    document.getElementById('fs-btn').addEventListener('click', function() {
+        const container = document.getElementById('playerContainer');
+        if (container.requestFullscreen) {
+            container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+            container.webkitRequestFullscreen();
+        }
+    });
+
+    // ============================================================
+    // 🧹 СОХРАНЕНИЕ ПРИ ВЫХОДЕ
+    // ============================================================
+    window.addEventListener('beforeunload', function() {
+        if (player && typeof player.getCurrentTime === 'function') {
+            const t = player.getCurrentTime();
+            if (t > 0) saveCurrentState(t);
+        }
+    });
+
+    // ============================================================
+    // 🔢 СЧЁТЧИК ОНЛАЙН (имитация)
+    // ============================================================
+    function updateOnlineCounter() {
+        const count = Math.floor(Math.random() * 4) + 2;
+        document.getElementById('onlineCount').textContent = count;
+    }
+    updateOnlineCounter();
+    setInterval(updateOnlineCounter, 7000);
+
+    // ============================================================
+    // 🚀 СТАРТ
+    // ============================================================
+    setTimeout(() => {
+        const isActive = checkScheduleAndPlay();
+        if (!isActive && player === null) {
+            createPlayer(playlist[currentTrackIndex].id, savedTime, playlist[currentTrackIndex].title);
+        }
+    }, 500);
+
+    // Запускаем проверку расписания и обновление анонса каждую секунду
+    scheduleCheckInterval = setInterval(checkScheduleAndPlay, 1000);
+
+    console.log('🎬 Мульт ТВ (Смешарики + расписание на 13:00) загружен!');
 </script>
-</body>
-</html>
