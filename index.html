@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мульт ТВ — Прямой эфир</title>
     <style>
-        /* Глобальные сбросы и шрифты */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: radial-gradient(circle at 20% 20%, #1a1f35, #0b0e1a);
@@ -13,11 +12,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
             padding: 20px;
         }
-
-        /* Основной контейнер */
         .tv-wrapper {
             max-width: 900px;
             width: 100%;
@@ -27,10 +24,7 @@
             padding: 28px 28px 35px;
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 2px 0 rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.04);
-            transition: all 0.3s;
         }
-
-        /* Шапка */
         .header {
             display: flex;
             align-items: center;
@@ -61,12 +55,10 @@
             padding: 4px 14px;
             border-radius: 20px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
             animation: blink 1.5s infinite;
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
         }
         @keyframes blink { 50% { opacity: 0.4; } }
-
         .online-counter {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(4px);
@@ -84,8 +76,6 @@
             font-weight: 700;
             text-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
         }
-
-        /* Плеер */
         .video-container {
             position: relative;
             width: 100%;
@@ -100,10 +90,8 @@
             height: 100% !important;
             border: none;
             display: block;
-            pointer-events: none; /* полное отключение интерфейса YouTube */
+            pointer-events: none;
         }
-
-        /* Логотип канала (правый нижний угол) */
         .tv-badge {
             position: absolute;
             bottom: 20px;
@@ -137,8 +125,6 @@
             50% { opacity: 1; transform: scale(1.2); }
             100% { opacity: 0.4; transform: scale(0.8); }
         }
-
-        /* Информация о текущем эфире */
         .subtitle {
             margin-top: 16px;
             font-size: 1.2rem;
@@ -149,8 +135,6 @@
             letter-spacing: 0.3px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
-
-        /* Управление */
         .controls {
             display: flex;
             justify-content: center;
@@ -179,11 +163,53 @@
             transform: translateY(-2px);
             border-color: rgba(247, 201, 72, 0.3);
         }
-        .btn:active {
-            transform: translateY(0px);
-        }
+        .btn:active { transform: translateY(0px); }
 
-        /* Адаптив */
+        /* Программа передач */
+        .schedule-block {
+            margin-top: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .schedule-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        .schedule-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .schedule-time {
+            font-weight: 700;
+            color: #f7c948;
+            min-width: 55px;
+        }
+        .schedule-title-name {
+            color: #cbd5e1;
+        }
+        .schedule-item.active {
+            background: rgba(247, 201, 72, 0.15);
+            padding: 2px 12px;
+            border-radius: 30px;
+            border-left: 3px solid #f7c948;
+        }
+        .schedule-item.active .schedule-title-name {
+            color: #f7c948;
+        }
         @media (max-width: 600px) {
             .tv-wrapper { padding: 16px; border-radius: 32px; }
             .channel-title h1 { font-size: 2rem; }
@@ -191,13 +217,13 @@
             .tv-badge { font-size: 0.7rem; padding: 4px 12px; bottom: 12px; right: 12px; }
             .controls .btn { padding: 8px 18px; font-size: 0.85rem; }
             .subtitle { font-size: 1rem; }
+            .schedule-list { font-size: 0.8rem; gap: 8px; }
         }
     </style>
 </head>
 <body>
 
 <div class="tv-wrapper">
-    <!-- Шапка -->
     <div class="header">
         <div class="channel-title">
             <h1>Мульт ТВ</h1>
@@ -208,59 +234,94 @@
         </div>
     </div>
 
-    <!-- Плеер -->
     <div class="video-container" id="videoContainer">
-        <div class="tv-badge">
-            <span class="dot"></span> Мульт ТВ
-        </div>
+        <div class="tv-badge"><span class="dot"></span> Мульт ТВ</div>
         <iframe id="tv-player" allow="autoplay; fullscreen" allowfullscreen></iframe>
     </div>
 
-    <!-- Строка с названием текущего видео -->
     <div class="subtitle" id="currentTrack">Загрузка эфира...</div>
 
-    <!-- Кнопки управления -->
     <div class="controls">
         <button class="btn" id="muteBtn">🔇 Выключить звук</button>
         <button class="btn" id="fullscreenBtn">📺 Полный экран</button>
+    </div>
+
+    <!-- Блок расписания -->
+    <div class="schedule-block">
+        <div class="schedule-title">📅 Программа передач</div>
+        <div class="schedule-list" id="scheduleList">
+            <!-- заполняется через JavaScript -->
+        </div>
     </div>
 </div>
 
 <script>
     // ================================================================
-    //  👇👇👇  СЮДА ВСТАВЛЯЙТЕ СВОИ ВИДЕО  👇👇👇
-    //  Формат: { id: 'КОД_ИЗ_ССЫЛКИ', title: 'Название', duration: СЕКУНДЫ }
+    //  ╔══════════════════════════════════════════════════════════════╗
+    //  ║  РАСПИСАНИЕ (добавьте свои события)                       ║
+    //  ║  Формат: { time: 'ЧЧ:ММ', id: 'ID_ВИДЕО', title: 'Название', duration: СЕК } ║
+    //  ║  duration — длительность фильма (чтобы знать, когда он закончится) ║
+    //  ╚══════════════════════════════════════════════════════════════╝
+    // ================================================================
+    const scheduledEvents = [
+        // Пример: завтра в 13:00 показываем "Человек-паук: Совершенно новый день"
+        // (вставьте реальный ID видео и длительность)
+        { time: '13:00', id: 'YOUR_SPIDERMAN_VIDEO_ID', title: 'Человек-паук: Совершенно новый день', duration: 7200 },
+        // Можно добавить другие события
+        // { time: '18:00', id: 'ANOTHER_VIDEO_ID', title: 'Ещё фильм', duration: 5400 }
+    ];
+
+    // ================================================================
+    //  ПЛЕЙЛИСТ (обычный эфир, когда нет запланированных событий)
     // ================================================================
     const playlist = [
-        // Примеры (замените на свои фильмы):
         { id: 'byMMXeq0CcQ', title: 'Рик и Морти', duration: 1440 },
         { id: '_23N3DmBRXk', title: 'Маша и Медведь', duration: 4264 },
         { id: 'J5S3tU_mbi0', title: 'Симпсоны', duration: 3591 }
     ];
 
     // ================================================================
-    //  ЗАСТАВКА (показывается каждые 5 минут)
-    //  Длительность 5 секунд
+    //  ЗАСТАВКА (показывается каждые 5 минут, длится 5 секунд)
     // ================================================================
-    const introId = 'UJOG59hELH8';   // ваша заставка
-    const introDuration = 5;         // ровно 5 секунд
+    const introId = 'UJOG59hELH8';
+    const introDuration = 5;
 
     // ================================================================
     //  НИЖЕ НИЧЕГО НЕ ТРОГАЙТЕ
     // ================================================================
 
-    // Звук включен по умолчанию
-    let isMuted = false;  // <-- теперь звук сразу включён
-
-    const totalDuration = playlist.reduce((sum, item) => sum + item.duration, 0);
-    const hasPlaylist = playlist.length > 0;
-
+    let isMuted = false;  // звук включён по умолчанию
     let lastLoadedVideoId = "";
     const player = document.getElementById('tv-player');
     const currentTrack = document.getElementById('currentTrack');
     const muteBtn = document.getElementById('muteBtn');
 
-    // Функция формирования URL без mute (если звук включён)
+    const totalDuration = playlist.reduce((sum, item) => sum + item.duration, 0);
+    const hasPlaylist = playlist.length > 0;
+
+    // Функция для получения текущего времени в минутах от полуночи
+    function getCurrentTimeMinutes() {
+        const now = new Date();
+        return now.getHours() * 60 + now.getMinutes();
+    }
+
+    // Проверка, есть ли активное запланированное событие
+    function getActiveScheduledEvent() {
+        const now = new Date();
+        const currentMin = getCurrentTimeMinutes();
+        // Проходим по событиям
+        for (let ev of scheduledEvents) {
+            const [h, m] = ev.time.split(':').map(Number);
+            const eventMin = h * 60 + m;
+            // Если текущее время >= время начала и < время начала + duration (в минутах)
+            const endMin = eventMin + Math.ceil(ev.duration / 60);
+            if (currentMin >= eventMin && currentMin < endMin) {
+                return ev;
+            }
+        }
+        return null;
+    }
+
     function getVideoUrl(id, start = 0) {
         const muteParam = isMuted ? 1 : 0;
         return `https://www.youtube.com/embed/${id}?autoplay=1&start=${start}&mute=${muteParam}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&disablekb=1&fs=0&playsinline=1`;
@@ -279,12 +340,28 @@
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
 
-        // Заставка каждые 5 минут, только первые 5 секунд
+        // 1. Проверяем запланированное событие
+        const activeEvent = getActiveScheduledEvent();
+        if (activeEvent) {
+            // Рассчитываем, сколько секунд прошло с начала события
+            const [h, m] = activeEvent.time.split(':').map(Number);
+            const eventStartSec = h * 3600 + m * 60;
+            const currentSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            let elapsed = currentSec - eventStartSec;
+            if (elapsed < 0) elapsed = 0;
+            // Если видео ещё не загружено или другое, загружаем с нужным таймкодом
+            const title = '📽️ ' + activeEvent.title;
+            loadVideo(activeEvent.id, elapsed, title);
+            return;
+        }
+
+        // 2. Заставка каждые 5 минут (только если нет активного события)
         if (hasPlaylist && minutes % 5 === 0 && seconds < introDuration) {
             loadVideo(introId, 0, '📺 Заставка Мульт ТВ');
             return;
         }
 
+        // 3. Обычный эфир
         if (!hasPlaylist) {
             currentTrack.textContent = 'Добавьте видео в плейлист!';
             return;
@@ -311,6 +388,35 @@
         }
     }
 
+    // Обновление отображения расписания
+    function renderSchedule() {
+        const scheduleList = document.getElementById('scheduleList');
+        const now = new Date();
+        const currentMin = getCurrentTimeMinutes();
+        let html = '';
+        // Сортируем события по времени
+        const sorted = [...scheduledEvents].sort((a, b) => {
+            const [h1, m1] = a.time.split(':').map(Number);
+            const [h2, m2] = b.time.split(':').map(Number);
+            return (h1*60+m1) - (h2*60+m2);
+        });
+        for (let ev of sorted) {
+            const [h, m] = ev.time.split(':').map(Number);
+            const eventMin = h * 60 + m;
+            const endMin = eventMin + Math.ceil(ev.duration / 60);
+            const isActive = (currentMin >= eventMin && currentMin < endMin);
+            const activeClass = isActive ? 'active' : '';
+            html += `<div class="schedule-item ${activeClass}">
+                        <span class="schedule-time">${ev.time}</span>
+                        <span class="schedule-title-name">${ev.title}</span>
+                     </div>`;
+        }
+        if (sorted.length === 0) {
+            html = '<span style="color:#64748b;">Нет запланированных передач</span>';
+        }
+        scheduleList.innerHTML = html;
+    }
+
     // Счётчик зрителей
     function initOnlineCounter() {
         if (!sessionStorage.getItem('multtv_device_token')) {
@@ -335,15 +441,16 @@
     }
     initOnlineCounter();
 
-    // Запуск эфира
+    // Запускаем обновление эфира и расписания
     updateBroadcast();
     setInterval(updateBroadcast, 1000);
+    renderSchedule();
+    setInterval(renderSchedule, 10000); // обновление расписания каждые 10 секунд
 
-    // Управление звуком (кнопка)
+    // Управление звуком
     muteBtn.addEventListener('click', function() {
         isMuted = !isMuted;
         this.innerHTML = isMuted ? "🔇 Включить звук" : "🔊 Выключить звук";
-        // Перезагружаем текущее видео с новым mute-параметром
         const currentSrc = player.src;
         if (currentSrc) {
             const url = new URL(currentSrc);
