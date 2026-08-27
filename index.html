@@ -322,9 +322,8 @@
     <!-- =========================================================== -->
     <script src="https://www.youtube.com/iframe_api">
     </script>
-                    <!-- =========================================================== -->
-<!-- 5. ОСНОВНОЙ СКРИПТ                                          -->
-<!-- =========================================================== -->
+    }
+
 <script>
     // ============================================================
     // 📋 ТВОЙ ПЛЕЙЛИСТ (Смешарики) с длительностью в секундах
@@ -336,28 +335,22 @@
     ];
 
     // ============================================================
-    // 📅 РАСПИСАНИЕ: сегодня в 13:00 — Человек-паук
+    // 🎬 ЗАСТАВКА (каждые 5 минут по 5 секунд)
     // ============================================================
-    const scheduledEvent = {
-        videoId: 'Jwi1Y7fK_t4',
-        title: 'Человек-паук: Совершенно новый день',
-        timeMinutes: 13 * 60, // 13:00
-        durationMinutes: 145  // 2 часа (можно поправить)
-    };
+    const introId = 'UJOG59hELH8';
+    const introDuration = 5;
 
     // ============================================================
     // 🧠 ПЕРЕМЕННЫЕ
     // ============================================================
     let currentTrackIndex = 0;
-    let isMuted = false; // звук включён по умолчанию
+    let isMuted = false;
     let player = null;
     let playerReady = false;
     let savedTime = 0;
-    let isScheduledActive = false;
-    let scheduleCheckInterval = null;
 
     // ============================================================
-    // ⏳ ВОССТАНОВЛЕНИЕ ВРЕМЕНИ ПРИ ПЕРЕЗАГРУЗКЕ
+    // ⏳ ВОССТАНОВЛЕНИЕ ВРЕМЕНИ
     // ============================================================
     function loadSavedState() {
         const saved = localStorage.getItem('multtv_state');
@@ -370,7 +363,7 @@
                 if (data.time) {
                     savedTime = parseFloat(data.time) || 0;
                 }
-            } catch (e) { /* тихо */ }
+            } catch (e) {}
         }
     }
 
@@ -380,7 +373,7 @@
                 trackIndex: currentTrackIndex,
                 time: time || 0
             }));
-        } catch (e) { /* тихо */ }
+        } catch (e) {}
     }
 
     // ============================================================
@@ -407,12 +400,6 @@
         shield.id = 'shield';
         container.appendChild(shield);
 
-        if (videoId === scheduledEvent.videoId) {
-            isScheduledActive = true;
-        } else {
-            isScheduledActive = false;
-        }
-
         player = new YT.Player('yt-iframe-placeholder', {
             height: '100%',
             width: '100%',
@@ -432,10 +419,10 @@
     }
 
     // ============================================================
-    // ⏳ КОГДА ПЛЕЕР ГОТОВ — ВОССТАНАВЛИВАЕМ ВРЕМЯ
+    // ⏳ КОГДА ПЛЕЕР ГОТОВ
     // ============================================================
     function onPlayerReady(event) {
-        if (savedTime > 0 && !isScheduledActive) {
+        if (savedTime > 0) {
             event.target.seekTo(savedTime, true);
         }
         setInterval(() => {
@@ -447,85 +434,39 @@
     }
 
     // ============================================================
-    // 🔄 ПРОВЕРКА РАСПИСАНИЯ (каждую секунду)
+    // 🔄 ОСНОВНАЯ ЛОГИКА (заставка + плейлист)
     // ============================================================
-    function checkScheduleAndPlay() {
+    function checkAndPlay() {
         const now = new Date();
-        const minutes = now.getHours() * 60 + now.getMinutes();
+        const minutes = now.getMinutes();
         const seconds = now.getSeconds();
-        const eventStart = scheduledEvent.timeMinutes;
-        const eventEnd = eventStart + scheduledEvent.durationMinutes;
 
-        // Обновляем анонс с обратным отсчётом
-        updateAnnouncement(minutes, seconds);
-
-        if (minutes >= eventStart && minutes < eventEnd) {
-            if (!isScheduledActive) {
-                const elapsedMinutes = minutes - eventStart;
-                const startSeconds = elapsedMinutes * 60 + seconds;
-                createPlayer(scheduledEvent.videoId, startSeconds, '📽️ ' + scheduledEvent.title);
+        // 1. Заставка каждые 5 минут на 5 секунд
+        if (minutes % 5 === 0 && seconds < introDuration) {
+            if (player && player.getVideoData) {
+                const currentId = player.getVideoData().video_id;
+                if (currentId !== introId) {
+                    createPlayer(introId, 0, '📺 Заставка Мульт ТВ');
+                }
+            } else {
+                createPlayer(introId, 0, '📺 Заставка Мульт ТВ');
             }
-            return true;
-        } else {
-            if (isScheduledActive) {
-                isScheduledActive = false;
-                createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
-            }
-            return false;
-        }
-    }
-
-    // ============================================================
-    // 📢 ОБНОВЛЕНИЕ АНОНСА (обратный отсчёт до 13:00)
-    // ============================================================
-    function updateAnnouncement(currentMinutes, currentSeconds) {
-        const announceBlock = document.querySelector('.announce-block');
-        if (!announceBlock) return;
-
-        const targetMin = scheduledEvent.timeMinutes; // 780
-        const nowMin = currentMinutes;
-        const nowSec = currentSeconds;
-
-        // Если сейчас идёт Человек-паук
-        if (nowMin >= targetMin && nowMin < targetMin + scheduledEvent.durationMinutes) {
-            announceBlock.innerHTML = `
-                <div class="announce-title">🎬 СЕЙЧАС В ЭФИРЕ</div>
-                <div class="announce-desc"><strong>${scheduledEvent.title}</strong></div>
-            `;
             return;
         }
 
-        // Если Человек-паук уже прошёл (после 15:00)
-        if (nowMin >= targetMin + scheduledEvent.durationMinutes) {
-            announceBlock.innerHTML = `
-                <div class="announce-title">⭐ СЕГОДНЯ В 13:00</div>
-                <div class="announce-desc"><strong>${scheduledEvent.title}</strong> (уже прошёл)</div>
-            `;
-            return;
+        // 2. Если заставка закончилась, возвращаемся к плейлисту
+        if (player && player.getVideoData) {
+            const currentId = player.getVideoData().video_id;
+            if (currentId === introId) {
+                // Если заставка закончилась, переключаем на следующий трек
+                // Но мы не знаем, когда она закончится — полагаемся на onStateChange
+                // Поэтому здесь ничего не делаем, onStateChange переключит.
+            }
         }
 
-        // Если до 13:00 осталось меньше 30 минут — показываем обратный отсчёт
-        const diffMinutes = targetMin - nowMin;
-        if (diffMinutes <= 30 && diffMinutes > 0) {
-            const totalSeconds = diffMinutes * 60 - nowSec;
-            const mins = Math.floor(totalSeconds / 60);
-            const secs = totalSeconds % 60;
-            announceBlock.innerHTML = `
-                <div class="announce-title">⏳ СКОРО В ЭФИРЕ</div>
-                <div class="announce-desc">
-                    <strong>${scheduledEvent.title}</strong><br>
-                    <span style="color: #f7c948; font-size: 1.1rem;">
-                        через ${mins} мин ${secs} сек
-                    </span>
-                </div>
-            `;
-        } else {
-            // Обычный анонс
-            announceBlock.innerHTML = `
-                <div class="announce-title">⭐ СЕГОДНЯ В 13:00</div>
-                <div class="announce-desc"><strong>${scheduledEvent.title}</strong></div>
-                <a class="announce-link" href="https://youtu.be/dT4Ikxceg7A" target="_blank">▶ Смотреть трейлер</a>
-            `;
+        // 3. Если плеер не инициализирован или простаивает — запускаем плейлист
+        if (!player || !player.getVideoData) {
+            createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
         }
     }
 
@@ -534,15 +475,23 @@
     // ============================================================
     function onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.ENDED) {
-            if (isScheduledActive) {
-                isScheduledActive = false;
-                currentTrackIndex = 0;
-                savedTime = 0;
-                saveCurrentState(0);
-                createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
-                return;
+            // Если закончилась заставка
+            if (player && player.getVideoData) {
+                const currentId = player.getVideoData().video_id;
+                if (currentId === introId) {
+                    // Переключаем на следующий трек из плейлиста
+                    currentTrackIndex++;
+                    if (currentTrackIndex >= playlist.length) {
+                        currentTrackIndex = 0;
+                    }
+                    savedTime = 0;
+                    saveCurrentState(0);
+                    createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
+                    return;
+                }
             }
 
+            // Обычное окончание трека из плейлиста
             currentTrackIndex++;
             if (currentTrackIndex >= playlist.length) {
                 currentTrackIndex = 0;
@@ -611,14 +560,11 @@
     // 🚀 СТАРТ
     // ============================================================
     setTimeout(() => {
-        const isActive = checkScheduleAndPlay();
-        if (!isActive && player === null) {
-            createPlayer(playlist[currentTrackIndex].id, savedTime, playlist[currentTrackIndex].title);
-        }
+        checkAndPlay();
     }, 500);
 
-    // Запускаем проверку расписания и обновление анонса каждую секунду
-    scheduleCheckInterval = setInterval(checkScheduleAndPlay, 1000);
+    // Запускаем проверку каждую секунду (для заставки)
+    setInterval(checkAndPlay, 1000);
 
-    console.log('🎬 Мульт ТВ (Смешарики + расписание на 13:00) загружен!');
+    console.log('🎬 Мульт ТВ (только эфир + заставка) загружен!');
 </script>
