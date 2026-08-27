@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Мульт ТВ — Прямой эфир</title>
 
-    <!-- =========================================================== -->
-    <!-- 1. ЗАЩИТА ОТ ИНСТРУМЕНТОВ РАЗРАБОТЧИКА                        -->
-    <!-- =========================================================== -->
+    <!-- Защита -->
     <script>
         (function() {
             'use strict';
@@ -25,10 +23,7 @@
                 }
                 if (e.key === 'F1') { e.preventDefault(); return false; }
             }, true);
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                return false;
-            }, true);
+            document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; }, true);
             window.addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.shiftKey) { e.preventDefault(); return false; }
                 if (e.metaKey && e.altKey && e.key === 'I') { e.preventDefault(); return false; }
@@ -42,15 +37,8 @@
     </script>
 
     <style>
-        /* =========================================================== */
-        /* 2. СТИЛИ (ТОТ ЖЕ ИНТЕРФЕЙС, ЧТО У ВЕТРА)                  */
-        /* =========================================================== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* ===== Стили (те же, что у тебя) ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-main: #020617;
             --panel-bg: rgba(15, 23, 42, 0.45);
@@ -58,7 +46,6 @@
             --accent-glow: rgba(247, 201, 72, 0.25);
             --text-main: #f8fafc;
         }
-
         body {
             background-color: var(--bg-main);
             background-image:
@@ -74,7 +61,6 @@
             user-select: none;
             -webkit-user-select: none;
         }
-
         .cinema-grid {
             display: grid;
             grid-template-columns: 1fr 340px;
@@ -82,19 +68,8 @@
             width: 100%;
             max-width: 1150px;
         }
-
-        @media (max-width: 900px) {
-            .cinema-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .video-section {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
+        @media (max-width: 900px) { .cinema-grid { grid-template-columns: 1fr; } }
+        .video-section { display: flex; flex-direction: column; gap: 16px; }
         .main-theater {
             position: relative;
             background: #000;
@@ -105,14 +80,12 @@
             overflow: hidden;
             width: 100%;
         }
-
         .main-theater iframe,
         .main-theater #yt-iframe-placeholder {
             width: 100%;
             height: 100%;
             border: none;
         }
-
         .shield {
             position: absolute;
             top: 0;
@@ -124,7 +97,6 @@
             pointer-events: auto;
             background: transparent;
         }
-
         .side-dashboard {
             background: var(--panel-bg);
             backdrop-filter: blur(16px);
@@ -137,7 +109,6 @@
             justify-content: space-between;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
-
         .station-info h1 {
             font-size: 28px;
             font-weight: 800;
@@ -147,7 +118,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
         .badge-live {
             display: inline-flex;
             align-items: center;
@@ -162,7 +132,6 @@
             letter-spacing: 1px;
             border: 1px solid rgba(239, 68, 68, 0.2);
         }
-
         .pulse-ring {
             width: 6px;
             height: 6px;
@@ -170,13 +139,11 @@
             border-radius: 50%;
             animation: live-glow 1.5s infinite;
         }
-
         @keyframes live-glow {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
             70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-
         .meta-list {
             margin: 20px 0;
             padding: 0;
@@ -184,58 +151,18 @@
             font-size: 13px;
             color: #94a3b8;
         }
-
         .meta-list li {
             padding: 10px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             display: flex;
             justify-content: space-between;
         }
-
-        .meta-list strong {
-            color: #f1f5f9;
-        }
-
-        .announce-block {
-            margin: 12px 0 16px;
-            padding: 12px 16px;
-            background: rgba(247, 201, 72, 0.08);
-            border-left: 3px solid var(--accent);
-            border-radius: 8px;
-            font-size: 13px;
-        }
-        .announce-block .announce-title {
-            color: var(--accent);
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        .announce-block .announce-desc {
-            color: #cbd5e1;
-            margin-top: 4px;
-        }
-        .announce-block .announce-link {
-            display: inline-block;
-            margin-top: 8px;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-            border: 1px solid rgba(247, 201, 72, 0.3);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-        .announce-block .announce-link:hover {
-            background: rgba(247, 201, 72, 0.15);
-            border-color: var(--accent);
-        }
-
+        .meta-list strong { color: #f1f5f9; }
         .action-container {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-
         .btn-modern {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -253,19 +180,16 @@
             justify-content: center;
             gap: 8px;
         }
-
         .btn-modern:hover {
             background: rgba(247, 201, 72, 0.08);
             border-color: var(--accent);
             color: var(--accent);
             box-shadow: 0 0 20px rgba(247, 201, 72, 0.15);
         }
-
         .btn-glow {
             background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
             border: none;
         }
-
         .btn-glow:hover {
             background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
             color: #fff;
@@ -276,15 +200,11 @@
 <body>
 
     <div class="cinema-grid">
-
-        <!-- ЛЕВАЯ КОЛОНКА: ПЛЕЕР -->
         <div class="video-section">
             <div class="main-theater" id="playerContainer">
                 <div class="shield" id="shield"></div>
             </div>
         </div>
-
-        <!-- ПРАВАЯ КОЛОНКА: ИНФО + КНОПКИ -->
         <div class="side-dashboard">
             <div class="station-info">
                 <div class="badge-live">
@@ -292,24 +212,13 @@
                     Эфир
                 </div>
                 <h1>Мульт ТВ</h1>
-
                 <ul class="meta-list">
                     <li>Сейчас в эфире: <strong id="currentShowTitle">Загрузка...</strong></li>
                     <li>Качество: <strong>Ultra HD 4K</strong></li>
                     <li>Онлайн: <strong><span id="onlineCount">0</span> чел.</strong></li>
                 </ul>
-
-                <!-- БЛОК АНОНСА — СЕГОДНЯ В 13:00 -->
-                <div class="announce-block">
-                    <div class="announce-title">⭐ СЕГОДНЯ В 13:00</div>
-                    <div class="announce-desc">
-                        <strong>«Человек-паук: Совершенно новый день»</strong>
-                    </div>
-                    <a class="announce-link" href="https://youtu.be/dT4Ikxceg7A" target="_blank">▶ Смотреть трейлер</a>
-                    <!-- замени ВАШ_ID_ВИДЕО на реальный ID -->
-                </div>
+                <!-- Анонс убран, т.к. расписание не нужно -->
             </div>
-
             <div class="action-container">
                 <button class="btn-modern btn-glow" id="mute-btn">🔇 Выключить звук</button>
                 <button class="btn-modern" id="fs-btn">📺 Полный экран</button>
@@ -317,119 +226,246 @@
         </div>
     </div>
 
-    <!-- =========================================================== -->
-    <!-- 4. ПОДКЛЮЧЕНИЕ YOUTUBE API                                  -->
-    <!-- =========================================================== -->
-    <script src="https://www.youtube.com/iframe_api">
-    </script>
-    }
+    <!-- Подключение YouTube API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 
-<script>
-    // ============================================================
-    // 📋 ТВОЙ ПЛЕЙЛИСТ (Смешарики) с длительностью в секундах
-    // ============================================================
-    const playlist = [
-        { id: 'Lu0pj1L6mL8', title: 'Смешарики Лучшие серии', duration: 3600 },
-        { id: '1vBgKm9qhhM', title: 'Смешарики Прощяемся с летом 2026', duration: 3600 },
-        { id: 'gs-MZg77o6w', title: 'Смешарики Сборник', duration: 3600 }
-    ];
+    <!-- Основной скрипт -->
+    <script>
+        // ============================================================
+        // 📋 ТВОЙ ПЛЕЙЛИСТ (Смешарики) с длительностью в секундах
+        // ============================================================
+        const playlist = [
+            { id: 'Lu0pj1L6mL8', title: 'Смешарики Лучшие серии', duration: 3600 },
+            { id: '1vBgKm9qhhM', title: 'Смешарики Прощяемся с летом 2026', duration: 3600 },
+            { id: 'gs-MZg77o6w', title: 'Смешарики Сборник', duration: 3600 }
+        ];
 
-    // ============================================================
-    // 🎬 ЗАСТАВКА (каждые 5 минут по 5 секунд)
-    // ============================================================
-    const introId = 'UJOG59hELH8';
-    const introDuration = 5;
+        // ============================================================
+        // 🎬 ЗАСТАВКА (каждые 5 минут по 5 секунд)
+        // ============================================================
+        const introId = 'UJOG59hELH8';
+        const introDuration = 5;
 
-    // ============================================================
-    // 🧠 ПЕРЕМЕННЫЕ
-    // ============================================================
-    let currentTrackIndex = 0;
-    let isMuted = false;
-    let player = null;
-    let playerReady = false;
-    let savedTime = 0;
+        // ============================================================
+        // 🧠 ПЕРЕМЕННЫЕ
+        // ============================================================
+        let currentTrackIndex = 0;
+        let isMuted = false;
+        let player = null;
+        let playerReady = false;
+        let savedTime = 0;
 
-    // ============================================================
-    // ⏳ ВОССТАНОВЛЕНИЕ ВРЕМЕНИ
-    // ============================================================
-    function loadSavedState() {
-        const saved = localStorage.getItem('multtv_state');
-        if (saved) {
+        // ============================================================
+        // ⏳ ВОССТАНОВЛЕНИЕ ВРЕМЕНИ
+        // ============================================================
+        function loadSavedState() {
+            const saved = localStorage.getItem('multtv_state');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.trackIndex !== undefined) {
+                        currentTrackIndex = data.trackIndex % playlist.length;
+                    }
+                    if (data.time) {
+                        savedTime = parseFloat(data.time) || 0;
+                    }
+                } catch (e) {}
+            }
+        }
+
+        function saveCurrentState(time) {
             try {
-                const data = JSON.parse(saved);
-                if (data.trackIndex !== undefined) {
-                    currentTrackIndex = data.trackIndex % playlist.length;
-                }
-                if (data.time) {
-                    savedTime = parseFloat(data.time) || 0;
-                }
+                localStorage.setItem('multtv_state', JSON.stringify({
+                    trackIndex: currentTrackIndex,
+                    time: time || 0
+                }));
             } catch (e) {}
         }
-    }
 
-    function saveCurrentState(time) {
-        try {
-            localStorage.setItem('multtv_state', JSON.stringify({
-                trackIndex: currentTrackIndex,
-                time: time || 0
-            }));
-        } catch (e) {}
-    }
+        // ============================================================
+        // 🚀 СОЗДАНИЕ ПЛЕЕРА
+        // ============================================================
+        function onYouTubeIframeAPIReady() {
+            playerReady = true;
+            loadSavedState();
+            createPlayer();
+        }
 
-    // ============================================================
-    // 🚀 СОЗДАНИЕ ПЛЕЕРА
-    // ============================================================
-    function onYouTubeIframeAPIReady() {
-        playerReady = true;
-        loadSavedState();
-        createPlayer();
-    }
+        function createPlayer(videoId, startTime = 0, title = null) {
+            if (!playerReady) return;
 
-    function createPlayer(videoId, startTime = 0, title = null) {
-        if (!playerReady) return;
+            const id = videoId || playlist[currentTrackIndex].id;
+            const displayTitle = title || playlist[currentTrackIndex].title;
+            document.getElementById('currentShowTitle').textContent = displayTitle;
 
-        const id = videoId || playlist[currentTrackIndex].id;
-        const displayTitle = title || playlist[currentTrackIndex].title;
-        document.getElementById('currentShowTitle').textContent = displayTitle;
+            const container = document.getElementById('playerContainer');
+            container.innerHTML = '<div id="yt-iframe-placeholder"></div>';
 
-        const container = document.getElementById('playerContainer');
-        container.innerHTML = '<div id="yt-iframe-placeholder"></div>';
+            const shield = document.createElement('div');
+            shield.className = 'shield';
+            shield.id = 'shield';
+            container.appendChild(shield);
 
-        const shield = document.createElement('div');
-        shield.className = 'shield';
-        shield.id = 'shield';
-        container.appendChild(shield);
+            player = new YT.Player('yt-iframe-placeholder', {
+                height: '100%',
+                width: '100%',
+                videoId: id,
+                playerVars: {
+                    autoplay: 1,
+                    controls: 1,
+                    rel: 0,
+                    mute: isMuted ? 1 : 0,
+                    start: Math.floor(startTime)
+                },
+                events: {
+                    onStateChange: onPlayerStateChange,
+                    onReady: onPlayerReady
+                }
+            });
+        }
 
-        player = new YT.Player('yt-iframe-placeholder', {
-            height: '100%',
-            width: '100%',
-            videoId: id,
-            playerVars: {
-                autoplay: 1,
-                controls: 1,
-                rel: 0,
-                mute: isMuted ? 1 : 0,
-                start: Math.floor(startTime)
-            },
-            events: {
-                onStateChange: onPlayerStateChange,
-                onReady: onPlayerReady
+        // ============================================================
+        // ⏳ КОГДА ПЛЕЕР ГОТОВ
+        // ============================================================
+        function onPlayerReady(event) {
+            if (savedTime > 0) {
+                event.target.seekTo(savedTime, true);
+            }
+            setInterval(() => {
+                if (player && typeof player.getCurrentTime === 'function') {
+                    const t = player.getCurrentTime();
+                    if (t > 0) saveCurrentState(t);
+                }
+            }, 5000);
+        }
+
+        // ============================================================
+        // 🔄 ОСНОВНАЯ ЛОГИКА (заставка + плейлист)
+        // ============================================================
+        function checkAndPlay() {
+            const now = new Date();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            // 1. Заставка каждые 5 минут на 5 секунд
+            if (minutes % 5 === 0 && seconds < introDuration) {
+                if (player && player.getVideoData) {
+                    const currentId = player.getVideoData().video_id;
+                    if (currentId !== introId) {
+                        createPlayer(introId, 0, '📺 Заставка Мульт ТВ');
+                    }
+                } else {
+                    createPlayer(introId, 0, '📺 Заставка Мульт ТВ');
+                }
+                return;
+            }
+
+            // 2. Если плеер не инициализирован или простаивает — запускаем плейлист
+            if (!player || !player.getVideoData) {
+                createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
+            }
+        }
+
+        // ============================================================
+        // ОБРАБОТКА СОСТОЯНИЙ ПЛЕЕРА
+        // ============================================================
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                // Если закончилась заставка
+                if (player && player.getVideoData) {
+                    const currentId = player.getVideoData().video_id;
+                    if (currentId === introId) {
+                        // Переключаем на следующий трек из плейлиста
+                        currentTrackIndex++;
+                        if (currentTrackIndex >= playlist.length) {
+                            currentTrackIndex = 0;
+                        }
+                        savedTime = 0;
+                        saveCurrentState(0);
+                        createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
+                        return;
+                    }
+                }
+
+                // Обычное окончание трека из плейлиста
+                currentTrackIndex++;
+                if (currentTrackIndex >= playlist.length) {
+                    currentTrackIndex = 0;
+                }
+                savedTime = 0;
+                saveCurrentState(0);
+                createPlayer(playlist[currentTrackIndex].id, 0, playlist[currentTrackIndex].title);
+            }
+
+            if (event.data === YT.PlayerState.PAUSED) {
+                if (player && typeof player.getCurrentTime === 'function') {
+                    saveCurrentState(player.getCurrentTime());
+                }
+            }
+        }
+
+        // ============================================================
+        // 🔊 КНОПКА ЗВУКА
+        // ============================================================
+        document.getElementById('mute-btn').addEventListener('click', function() {
+            if (player && typeof player.mute === 'function') {
+                isMuted = !isMuted;
+                if (isMuted) {
+                    player.mute();
+                    this.textContent = '🔊 Включить звук';
+                } else {
+                    player.unMute();
+                    this.textContent = '🔇 Выключить звук';
+                }
             }
         });
-    }
 
-    // ============================================================
-    // ⏳ КОГДА ПЛЕЕР ГОТОВ
-    // ============================================================
-    function onPlayerReady(event) {
-        if (savedTime > 0) {
-            event.target.seekTo(savedTime, true);
-        }
-        setInterval(() => {
+        // ============================================================
+        // 📺 ПОЛНЫЙ ЭКРАН
+        // ============================================================
+        document.getElementById('fs-btn').addEventListener('click', function() {
+            const container = document.getElementById('playerContainer');
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            }
+        });
+
+        // ============================================================
+        // 🧹 СОХРАНЕНИЕ ПРИ ВЫХОДЕ
+        // ============================================================
+        window.addEventListener('beforeunload', function() {
             if (player && typeof player.getCurrentTime === 'function') {
                 const t = player.getCurrentTime();
                 if (t > 0) saveCurrentState(t);
             }
+        });
+
+        // ============================================================
+        // 🔢 СЧЁТЧИК ОНЛАЙН (имитация)
+        // ============================================================
+        function updateOnlineCounter() {
+            const count = Math.floor(Math.random() * 4) + 2;
+            document.getElementById('onlineCount').textContent = count;
+        }
+        updateOnlineCounter();
+        setInterval(updateOnlineCounter, 7000);
+
+        // ============================================================
+        // 🚀 СТАРТ
+        // ============================================================
+        setTimeout(() => {
+            checkAndPlay();
+        }, 500);
+
+        // Запускаем проверку каждую секунду (для заставки)
+        setInterval(checkAndPlay, 1000);
+
+        console.log('🎬 Мульт ТВ (только эфир + заставка) загружен!');
+    </script>
+</body>
+</html>            }
         }, 5000);
     }
 
