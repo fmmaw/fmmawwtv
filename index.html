@@ -58,6 +58,8 @@
             height: 480px !important;
             border: none;
             display: block;
+            /* Отключаем все взаимодействия с плеером — интерфейс YouTube не появится */
+            pointer-events: none;
         }
         .controls {
             margin-top: 20px;
@@ -79,28 +81,31 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .btn:hover { background-color: #0369a1; transform: translateY(-1px); }
+        
+        /* Логотип канала — правый нижний угол */
         .tv-badge {
             position: absolute;
-            top: 15px;
-            left: 18px;
-            background: rgba(0, 0, 0, 0.7);
+            bottom: 18px;
+            right: 18px;
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(3px);
             padding: 6px 16px;
             border-radius: 40px;
             border-left: 4px solid #f7c948;
             color: white;
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             z-index: 35;
             pointer-events: none;
             display: flex;
             align-items: center;
             gap: 8px;
+            opacity: 0.85;
         }
         .tv-badge span {
             background: #f7c948;
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
             animation: pulse-dot 1.6s infinite;
@@ -130,6 +135,7 @@
             .video-container { height: 280px; }
             iframe { height: 280px !important; }
             .controls .btn { padding: 8px 16px; font-size: 0.8rem; }
+            .tv-badge { font-size: 0.7rem; padding: 4px 12px; bottom: 10px; right: 10px; }
         }
     </style>
 </head>
@@ -156,10 +162,9 @@
     <script>
         // ================================================================
         //  👇👇👇  СЮДА ВСТАВЛЯЙТЕ СВОИ ВИДЕО  👇👇👇
-        //  Формат: { id: 'КОД_ИЗ_ССЫЛКИ', title: 'Название', duration: СЕКУНДЫ }
-        //  Примеры (замените на свои):
         // ================================================================
         const playlist = [
+            // Примеры (замените на свои):
             { id: 'byMMXeq0CcQ', title: 'Рик и Морти', duration: 1440 },
             { id: '_23N3DmBRXk', title: 'Маша и Медведь', duration: 4264 },
             { id: 'J5S3tU_mbi0', title: 'Симпсоны', duration: 3591 }
@@ -167,10 +172,10 @@
 
         // ================================================================
         //  ЗАСТАВКА (показывается каждые 5 минут)
-        //  Укажите свой ID и реальную длительность
+        //  Длительность заставки — 5 секунд
         // ================================================================
         const introId = 'UJOG59hELH8';   // ваша заставка
-        const introDuration = 5;        // длительность в секундах
+        const introDuration = 5;         // теперь ровно 5 секунд
 
         // ================================================================
         //  НИЖЕ НИЧЕГО НЕ ТРОГАЙТЕ
@@ -186,6 +191,7 @@
 
         function getVideoUrl(id, start = 0) {
             const muteParam = isMuted ? 1 : 0;
+            // Добавим параметры для скрытия интерфейса
             return `https://www.youtube.com/embed/${id}?autoplay=1&start=${start}&mute=${muteParam}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&disablekb=1&fs=0&playsinline=1`;
         }
 
@@ -202,7 +208,7 @@
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
 
-            // Заставка только если есть плейлист, и только в начале каждой 5-минутки
+            // Заставка каждые 5 минут, только 5 секунд
             if (hasPlaylist && minutes % 5 === 0 && seconds < introDuration) {
                 loadVideo(introId, 0, '📺 Заставка Мульт ТВ');
                 return;
@@ -210,7 +216,6 @@
 
             if (!hasPlaylist) {
                 currentTrack.textContent = 'Добавьте видео в плейлист!';
-                // Можно оставить чёрный экран или показать что-то по умолчанию
                 return;
             }
 
