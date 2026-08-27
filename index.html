@@ -155,41 +155,27 @@
 
     <script>
         // ================================================================
-        //  ╔══════════════════════════════════════════════════════════════╗
-        //  ║   👇👇👇  СЮДА ВСТАВЛЯЙТЕ СВОИ ВИДЕО  👇👇👇              ║
-        //  ║                                                              ║
-        //  ║  Формат:  { id: 'КОД_ИЗ_ССЫЛКИ', title: 'Название', duration: СЕКУНДЫ } ║
-        //  ║  КАК ПОЛУЧИТЬ ID:                                           ║
-        //  ║  • https://youtu.be/ABCD123  → id = 'ABCD123'              ║
-        //  ║  • https://www.youtube.com/watch?v=ABCD123 → id = 'ABCD123'║
-        //  ║  duration — приблизительная длительность видео в секундах   ║
-        //  ║                                                              ║
-        //  ║  ПРИМЕР (удалишь и вставишь свои):                         ║
-        //  ║  { id: 'UJOG59hELH8', title: 'Моя заставка', duration: 10 } ║
-        //  ╚══════════════════════════════════════════════════════════════╝
+        //  👇👇👇  СЮДА ВСТАВЛЯЙТЕ СВОИ ВИДЕО  👇👇👇
+        //  Формат: { id: 'КОД_ИЗ_ССЫЛКИ', title: 'Название', duration: СЕКУНДЫ }
         // ================================================================
-
         const playlist = [
             // ----- ВАШИ ВИДЕО (ДОБАВЛЯЙТЕ СЮДА) -----
-            // Например, если у вас есть фильм, вставьте его сюда:
-            // { id: 'ВАШ_КОД', title: 'НАЗВАНИЕ', duration: ДЛИТЕЛЬНОСТЬ_В_СЕКУНДАХ },
-            
-            // ---- ВРЕМЕННЫЙ ПРИМЕР (удалите или замените) ----
-            { id: '', title: 'Пример видео', duration: 0 }
+            // Например:
+            // { id: 'ABC123', title: 'Мой фильм', duration: 7200 },
         ];
 
         // ================================================================
         //  ЗАСТАВКА (показывается каждые 5 минут)
-        //  Сейчас стоит ваша заставка: https://youtu.be/UJOG59hELH8
+        //  Убедитесь, что видео с этим ID существует и разрешено встраивание
         // ================================================================
-        const introId = 'UJOG59hELH8';   // ID вашей заставки (уже вставлен)
-        const introDuration = 5;        // длительность заставки в секундах (укажите реальную)
+        const introId = 'UJOG59hELH8';   // ваша заставка
+        const introDuration = 11;        // реальная длительность заставки (в секундах)
 
         // ================================================================
-        //  НИЖЕ НИЧЕГО НЕ ТРОГАЙТЕ — ЭТО РАБОТА ПЛЕЕРА
+        //  НИЖЕ НИЧЕГО НЕ ТРОГАЙТЕ
         // ================================================================
 
-        // Если playlist пуст, просто покажем заставку в качестве заглушки
+        // Если плейлист пуст — будем показывать только заставку в цикле
         const hasPlaylist = playlist.length > 0;
         const totalDuration = hasPlaylist ? playlist.reduce((sum, item) => sum + item.duration, 0) : 1;
 
@@ -200,7 +186,6 @@
 
         function getVideoUrl(id, start = 0) {
             const muteParam = isMuted ? 1 : 0;
-            // Параметры, полностью скрывающие интерфейс YouTube
             return `https://www.youtube.com/embed/${id}?autoplay=1&start=${start}&mute=${muteParam}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&disablekb=1&fs=0&playsinline=1`;
         }
 
@@ -217,14 +202,18 @@
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
 
-            // Заставка каждые 5 минут (в начале каждой 5-минутки)
+            // Заставка каждые 5 минут
             if (minutes % 5 === 0 && seconds < introDuration) {
                 loadVideo(introId, 0, '📺 Заставка Мульт ТВ');
                 return;
             }
 
             if (!hasPlaylist) {
-                currentTrack.textContent = 'Добавьте видео в плейлист!';
+                // Если нет видео в плейлисте, показываем заставку как основное содержимое
+                // (чтобы не было пустого экрана)
+                if (lastLoadedVideoId !== introId) {
+                    loadVideo(introId, 0, '📺 Мульт ТВ — ожидание эфира');
+                }
                 return;
             }
 
@@ -249,7 +238,7 @@
             }
         }
 
-        // Счётчик зрителей (реальный, на основе уникальных токенов)
+        // Счётчик зрителей
         function initOnlineCounter() {
             if (!sessionStorage.getItem('multtv_device_token')) {
                 const token = Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
@@ -265,7 +254,6 @@
                         document.getElementById('onlineCount').textContent = data.online || 1;
                     })
                     .catch(() => {
-                        // Если сервис недоступен — показываем случайное число от 1 до 5
                         document.getElementById('onlineCount').textContent = Math.floor(Math.random() * 5) + 1;
                     });
             }
@@ -275,11 +263,11 @@
         }
         initOnlineCounter();
 
-        // Запускаем эфир
+        // Запуск
         updateBroadcast();
         setInterval(updateBroadcast, 1000);
 
-        // Управление звуком
+        // Звук
         document.getElementById('muteBtn').addEventListener('click', function() {
             isMuted = !isMuted;
             this.innerHTML = isMuted ? "🔇 Включить звук" : "🔊 Выключить звук";
