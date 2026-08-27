@@ -334,222 +334,247 @@
 
     <script src="https://www.youtube.com/iframe_api"></script>
 
-    <script>
-        // ============================================================
-        // 📅 РАСПИСАНИЕ — время в формате "ЧЧ:ММ" (24ч, локальное время браузера)
-        // source: "youtube" | "rutube"
-        // ============================================================
-        const schedule = [
-    { source: 'youtube', id: 'Lu0pj1L6mL8', title: 'Смешарики — Лучшие серии', duration: 19326 },   // 5ч 22м 6с
-    { source: 'youtube', id: 'zlIDRj6LmE8', title: 'А4 Кто последний покинет кухню челлендж', duration: 1865 }, // 31м 5с
-    { source: 'youtube', id: 'gs-MZg77o6w', title: 'Смешарики — Сборник', duration: 6221 },         // 1ч 43м 41с
-    { source: 'youtube', id: 'BJyJpjrpV38', title: 'Простоквашино Орех раздора', duration: 3969 },   // 1ч 6м 9с
-    { source: 'youtube', id: '7TL-nnd6t4U', title: 'Чип и дейл спешат на помощь', duration: 10506 }, // 2ч 55м 6с
-    { source: 'youtube', id: '1vBgKm9qhhM', title: 'Смешарики — Прощаемся с летом 2026', duration: 5109 }, // 1ч 25м 9с
-    { source: 'youtube', id: 'byMMXeq0CcQ', title: 'Рик и Морти', duration: 1439 },                 // 23м 59с
-    { source: 'youtube', id: '_23N3DmBRXk', title: 'Маша и Медведь', duration: 4264 },              // 1ч 11м 4с
-    { source: 'youtube', id: 'J5S3tU_mbi0', title: 'Симпсоны', duration: 3591 },                    // 59м 51с
-    { source: 'rutube', id: '62897760301277fe365b4801a36af310', title: 'Гадкий я 3 (2017)', duration: 5340 }, // 1ч 29м
-    { source: 'rutube', id: 'd86b7f93e884950db30369a00c93a22b', title: 'Миньоны (2015)', duration: 5460 },   // 1ч 31м
-    { source: 'rutube', id: '6e62ad497b0bfb57c9c0b108e9d97911', title: 'Spider-Man: Brand New Day (2026)', duration: 8672 }, // 2ч 24м 32с
-    { source: 'rutube', id: '69bdad2a1ad8105c5bb8b1adc0c32bf8', title: 'Spider-Man: No Way Home (2021)', duration: 8880 },  // 2ч 28м
-    { source: 'rutube', id: 'bb821bbb05e7e99597d4140c5cafe8af', title: 'Гадкий я 4', duration: 5340 }, // 1ч 29м
-];
+<script>
+    // ============================================================
+    // 📋 ПЛЕЙЛИСТ (порядок, длительность в секундах)
+    // ============================================================
+    const schedule = [
+        { source: 'youtube', id: 'Lu0pj1L6mL8', title: 'Смешарики — Лучшие серии', duration: 19326 },
+        { source: 'youtube', id: 'zlIDRj6LmE8', title: 'А4 Кто последний покинет кухню челлендж', duration: 1865 },
+        { source: 'youtube', id: 'gs-MZg77o6w', title: 'Смешарики — Сборник', duration: 6221 },
+        { source: 'youtube', id: 'BJyJpjrpV38', title: 'Простоквашино Орех раздора', duration: 3969 },
+        { source: 'youtube', id: '7TL-nnd6t4U', title: 'Чип и дейл спешат на помощь', duration: 10506 },
+        { source: 'youtube', id: '1vBgKm9qhhM', title: 'Смешарики — Прощаемся с летом 2026', duration: 5109 },
+        { source: 'youtube', id: 'byMMXeq0CcQ', title: 'Рик и Морти', duration: 1439 },
+        { source: 'youtube', id: '_23N3DmBRXk', title: 'Маша и Медведь', duration: 4264 },
+        { source: 'youtube', id: 'J5S3tU_mbi0', title: 'Симпсоны', duration: 3591 },
+        { source: 'rutube', id: '62897760301277fe365b4801a36af310', title: 'Гадкий я 3 (2017)', duration: 5340 },
+        { source: 'rutube', id: 'd86b7f93e884950db30369a00c93a22b', title: 'Миньоны (2015)', duration: 5460 },
+        { source: 'rutube', id: '6e62ad497b0bfb57c9c0b108e9d97911', title: 'Spider-Man: Brand New Day (2026)', duration: 8672 },
+        { source: 'rutube', id: '69bdad2a1ad8105c5bb8b1adc0c32bf8', title: 'Spider-Man: No Way Home (2021)', duration: 8880 },
+        { source: 'rutube', id: 'bb821bbb05e7e99597d4140c5cafe8af', title: 'Гадкий я 4', duration: 5340 },
+    ];
 
-        const interstitialVideoId = 'UJOG59hELH8';
-        const INTERSTITIAL_INTERVAL = 5 * 60;
-        const INTERSTITIAL_DURATION = 5;
+    const interstitialVideoId = 'UJOG59hELH8';
+    const INTERSTITIAL_INTERVAL = 5 * 60;
+    const INTERSTITIAL_DURATION = 5;
 
-        let isMuted = false;
-        let player = null;
-        let interstitialPlayer = null;
-        let playerReady = false;
-        let secondsSinceLastInterstitial = 0;
-        let mainTickInterval = null;
-        let interstitialTimeout = null;
-        let interstitialActive = false;
-        let currentSchedIndex = -1;
-        let switchTimeout = null;
+    let isMuted = false;
+    let player = null;
+    let interstitialPlayer = null;
+    let playerReady = false;
+    let secondsSinceLastInterstitial = 0;
+    let mainTickInterval = null;
+    let interstitialTimeout = null;
+    let interstitialActive = false;
+    let currentIndex = 0;
+    let rutubeTimer = null;
 
-        function pad(n) { return n.toString().padStart(2, '0'); }
+    // ============================================================
+    // ⏳ РАСЧЁТ ТЕКУЩЕГО ВИДЕО И ТАЙМКОДА ПО ВРЕМЕНИ (с 00:00)
+    // ============================================================
+    function getCurrentVideoAndTime() {
+        const now = new Date();
+        const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
-        function scheduleToMinutes(t) {
-            const [h, m] = t.split(':').map(Number);
-            return h * 60 + m;
-        }
+        const totalDuration = schedule.reduce((sum, s) => sum + s.duration, 0);
+        let elapsed = nowSec % totalDuration;
 
-        function getCurrentIndex() {
-            const now = new Date();
-            const nowMin = now.getHours() * 60 + now.getMinutes();
-            let idx = schedule.length - 1;
-            for (let i = 0; i < schedule.length; i++) {
-                if (scheduleToMinutes(schedule[i].time) <= nowMin) idx = i;
-                else break;
+        let acc = 0;
+        for (let i = 0; i < schedule.length; i++) {
+            if (elapsed < acc + schedule[i].duration) {
+                return {
+                    index: i,
+                    offset: Math.floor(elapsed - acc),
+                    entry: schedule[i]
+                };
             }
-            return idx;
+            acc += schedule[i].duration;
+        }
+        return { index: 0, offset: 0, entry: schedule[0] };
+    }
+
+    // ============================================================
+    // 🚀 ЗАГРУЗКА ВИДЕО
+    // ============================================================
+    function loadCurrentVideo() {
+        const { index, offset, entry } = getCurrentVideoAndTime();
+        currentIndex = index;
+        document.getElementById('currentShowTitle').textContent = entry.title;
+
+        const container = document.getElementById('playerContainer');
+        [...container.querySelectorAll('#yt-iframe-placeholder, .rutube-wrap')].forEach(n => n.remove());
+
+        if (rutubeTimer) {
+            clearTimeout(rutubeTimer);
+            rutubeTimer = null;
         }
 
-        function msUntilNextSwitch() {
-            const now = new Date();
-            const nowMin = now.getHours() * 60 + now.getMinutes() * 1 + now.getSeconds() / 60;
-            const nextIdx = (currentSchedIndex + 1) % schedule.length;
-            let nextMin = scheduleToMinutes(schedule[nextIdx].time);
-            if (nextMin <= nowMin) nextMin += 24 * 60;
-            return Math.max(5000, (nextMin - nowMin) * 60 * 1000);
-        }
+        if (entry.source === 'youtube') {
+            const holder = document.createElement('div');
+            holder.id = 'yt-iframe-placeholder';
+            container.insertBefore(holder, document.getElementById('interstitialOverlay'));
 
-        function renderScheduleList() {
-            const el = document.getElementById('scheduleList');
-            el.innerHTML = schedule.map((s, i) => `
-                <div class="row ${i === currentSchedIndex ? 'now' : ''}">
-                    <span>${s.time}</span>
-                    <span>${s.title}</span>
-                </div>
-            `).join('');
-        }
-
-        function renderDayTimeline() {
-            const track = document.getElementById('dayTimelineTrack');
-            const totalMin = 24 * 60;
-
-            const blocks = schedule.map((s, i) => {
-                const start = scheduleToMinutes(s.time);
-                const nextStart = i + 1 < schedule.length ? scheduleToMinutes(schedule[i + 1].time) : totalMin;
-                const widthPct = ((nextStart - start) / totalMin) * 100;
-                const cls = s.source === 'youtube' ? 'yt' : 'rt';
-                const activeCls = i === currentSchedIndex ? 'active' : '';
-                return `<div class="day-timeline-block ${cls} ${activeCls}" style="width:${widthPct}%" title="${s.time} · ${s.title}"></div>`;
-            }).join('');
-
-            const now = new Date();
-            const nowMin = now.getHours() * 60 + now.getMinutes();
-            const nowPct = (nowMin / totalMin) * 100;
-
-            track.innerHTML = blocks + `<div class="day-timeline-now" style="left:${nowPct}%"></div>`;
-        }
-
-        function onYouTubeIframeAPIReady() {
-            playerReady = true;
-        }
-
-        document.getElementById('startBtn').addEventListener('click', function() {
-            document.getElementById('startOverlay').classList.add('hidden');
-            loadCurrentSegment();
-            setInterval(renderDayTimeline, 60 * 1000);
-        });
-
-        function loadCurrentSegment() {
-            currentSchedIndex = getCurrentIndex();
-            const entry = schedule[currentSchedIndex];
-            document.getElementById('currentShowTitle').textContent = entry.title;
-            renderScheduleList();
-            renderDayTimeline();
-
-            // Сколько секунд уже "прошло" с начала этого слота по расписанию —
-            // видео стартует с этого места, как будто это настоящий эфир, и все,
-            // кто открыл страницу одновременно, видят одну и ту же точку.
-            const elapsedSeconds = secondsSinceSlotStart(entry);
-
-            const container = document.getElementById('playerContainer');
-            [...container.querySelectorAll('#yt-iframe-placeholder, .rutube-wrap')].forEach(n => n.remove());
-
-            if (entry.source === 'youtube') {
-                const holder = document.createElement('div');
-                holder.id = 'yt-iframe-placeholder';
-                container.insertBefore(holder, document.getElementById('interstitialOverlay'));
-                player = new YT.Player('yt-iframe-placeholder', {
-                    height: '100%', width: '100%',
-                    videoId: entry.id,
-                    playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, mute: isMuted ? 1 : 0, start: elapsedSeconds },
-                    events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange }
-                });
-            } else {
-                const wrap = document.createElement('div');
-                wrap.className = 'rutube-wrap';
-                wrap.innerHTML = `<iframe src="https://rutube.ru/play/embed/${entry.id}?autoplay=1&t=${elapsedSeconds}" allow="autoplay" frameborder="0" allowfullscreen></iframe>`;
-                container.insertBefore(wrap, document.getElementById('interstitialOverlay'));
-                startMainTicker();
+            if (player && typeof player.destroy === 'function') {
+                player.destroy();
+                player = null;
             }
 
-            if (switchTimeout) clearTimeout(switchTimeout);
-            switchTimeout = setTimeout(loadCurrentSegment, msUntilNextSwitch());
-        }
-
-        function secondsSinceSlotStart(entry) {
-            const now = new Date();
-            const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-            const [h, m] = entry.time.split(':').map(Number);
-            const startSec = h * 3600 + m * 60;
-            let diff = nowSec - startSec;
-            if (diff < 0) diff += 24 * 3600;
-            return Math.max(0, diff);
-        }
-
-        function onPlayerReady() {
-            startMainTicker();
-        }
-
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.ENDED) {
-                player.seekTo(0);
-                player.playVideo();
-            }
-        }
-
-        function startMainTicker() {
-            if (mainTickInterval) clearInterval(mainTickInterval);
-            mainTickInterval = setInterval(() => {
-                if (interstitialActive) return;
-                secondsSinceLastInterstitial += 5;
-                if (secondsSinceLastInterstitial >= INTERSTITIAL_INTERVAL) {
-                    secondsSinceLastInterstitial = 0;
-                    showInterstitial();
-                }
-            }, 5000);
-        }
-
-        function showInterstitial() {
-            interstitialActive = true;
-            if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
-
-            const overlay = document.getElementById('interstitialOverlay');
-            overlay.classList.add('active');
-
-            const holder = document.getElementById('yt-interstitial-placeholder');
-            holder.innerHTML = '';
-            interstitialPlayer = new YT.Player('yt-interstitial-placeholder', {
+            player = new YT.Player('yt-iframe-placeholder', {
                 height: '100%', width: '100%',
-                videoId: interstitialVideoId,
-                playerVars: { autoplay: 1, controls: 0, rel: 0, mute: isMuted ? 1 : 0 },
-                events: { onReady: (e) => e.target.playVideo() }
+                videoId: entry.id,
+                playerVars: {
+                    autoplay: 1,
+                    controls: 0,
+                    rel: 0,
+                    modestbranding: 1,
+                    mute: isMuted ? 1 : 0,
+                    start: offset,
+                },
+                events: {
+                    onReady: function() {
+                        startMainTicker();
+                    },
+                    onStateChange: function(event) {
+                        if (event.data === YT.PlayerState.ENDED) {
+                            nextVideo();
+                        }
+                    }
+                }
             });
+        } else {
+            const wrap = document.createElement('div');
+            wrap.className = 'rutube-wrap';
+            wrap.innerHTML = `<iframe src="https://rutube.ru/play/embed/${entry.id}?autoplay=1&t=${offset}" allow="autoplay" frameborder="0" allowfullscreen></iframe>`;
+            container.insertBefore(wrap, document.getElementById('interstitialOverlay'));
+            startMainTicker();
 
-            if (interstitialTimeout) clearTimeout(interstitialTimeout);
-            interstitialTimeout = setTimeout(hideInterstitial, INTERSTITIAL_DURATION * 1000);
+            const remaining = entry.duration - offset;
+            rutubeTimer = setTimeout(() => {
+                nextVideo();
+            }, remaining * 1000);
         }
 
-        function hideInterstitial() {
-            if (interstitialTimeout) clearTimeout(interstitialTimeout);
-            interstitialActive = false;
-            document.getElementById('interstitialOverlay').classList.remove('active');
-            if (interstitialPlayer && typeof interstitialPlayer.stopVideo === 'function') interstitialPlayer.stopVideo();
-            if (player && typeof player.playVideo === 'function') player.playVideo();
-        }
+        updateScheduleDisplay();
+    }
 
-        document.getElementById('mute-btn').addEventListener('click', function() {
-            isMuted = !isMuted;
-            if (player && typeof player.mute === 'function') {
-                isMuted ? player.mute() : player.unMute();
+    function nextVideo() {
+        if (rutubeTimer) {
+            clearTimeout(rutubeTimer);
+            rutubeTimer = null;
+        }
+        loadCurrentVideo();
+    }
+
+    // ============================================================
+    // 📋 ОТОБРАЖЕНИЕ РАСПИСАНИЯ
+    // ============================================================
+    function updateScheduleDisplay() {
+        const el = document.getElementById('scheduleList');
+        el.innerHTML = schedule.map((s, i) => `
+            <div class="row ${i === currentIndex ? 'now' : ''}">
+                <span>${String(i + 1).padStart(2, '0')}</span>
+                <span>${s.title}</span>
+            </div>
+        `).join('');
+
+        const track = document.getElementById('dayTimelineTrack');
+        const totalSec = schedule.reduce((sum, s) => sum + s.duration, 0);
+        let blocks = '';
+        let acc = 0;
+        schedule.forEach((s, i) => {
+            const widthPct = (s.duration / totalSec) * 100;
+            const cls = s.source === 'youtube' ? 'yt' : 'rt';
+            const activeCls = i === currentIndex ? 'active' : '';
+            blocks += `<div class="day-timeline-block ${cls} ${activeCls}" style="width:${widthPct}%; left:${(acc/totalSec)*100}%; position:absolute;" title="${s.title}"></div>`;
+            acc += s.duration;
+        });
+
+        const now = new Date();
+        const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        const nowPct = (nowSec % totalSec / totalSec) * 100;
+
+        track.innerHTML = blocks + `<div class="day-timeline-now" style="left:${nowPct}%"></div>`;
+    }
+
+    // ============================================================
+    // 🎬 ЗАСТАВКА
+    // ============================================================
+    function startMainTicker() {
+        if (mainTickInterval) clearInterval(mainTickInterval);
+        mainTickInterval = setInterval(() => {
+            if (interstitialActive) return;
+            secondsSinceLastInterstitial += 5;
+            if (secondsSinceLastInterstitial >= INTERSTITIAL_INTERVAL) {
+                secondsSinceLastInterstitial = 0;
+                showInterstitial();
             }
-            this.textContent = isMuted ? '🔊 Включить звук' : '🔇 Выключить звук';
+        }, 5000);
+    }
+
+    function showInterstitial() {
+        interstitialActive = true;
+        if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
+
+        const overlay = document.getElementById('interstitialOverlay');
+        overlay.classList.add('active');
+
+        const holder = document.getElementById('yt-interstitial-placeholder');
+        holder.innerHTML = '';
+        interstitialPlayer = new YT.Player('yt-interstitial-placeholder', {
+            height: '100%', width: '100%',
+            videoId: interstitialVideoId,
+            playerVars: { autoplay: 1, controls: 0, rel: 0, mute: isMuted ? 1 : 0 },
+            events: { onReady: (e) => e.target.playVideo() }
         });
 
-        document.getElementById('fs-btn').addEventListener('click', function() {
-            const container = document.getElementById('playerContainer');
-            if (container.requestFullscreen) container.requestFullscreen();
-            else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
-        });
-    </script>
+        if (interstitialTimeout) clearTimeout(interstitialTimeout);
+        interstitialTimeout = setTimeout(hideInterstitial, INTERSTITIAL_DURATION * 1000);
+    }
+
+    function hideInterstitial() {
+        if (interstitialTimeout) clearTimeout(interstitialTimeout);
+        interstitialActive = false;
+        document.getElementById('interstitialOverlay').classList.remove('active');
+        if (interstitialPlayer && typeof interstitialPlayer.stopVideo === 'function') interstitialPlayer.stopVideo();
+        if (player && typeof player.playVideo === 'function') player.playVideo();
+    }
+
+    // ============================================================
+    // 🎛️ КНОПКИ
+    // ============================================================
+    document.getElementById('mute-btn').addEventListener('click', function() {
+        isMuted = !isMuted;
+        if (player && typeof player.mute === 'function') {
+            isMuted ? player.mute() : player.unMute();
+        }
+        this.textContent = isMuted ? '🔊 Включить звук' : '🔇 Выключить звук';
+    });
+
+    document.getElementById('fs-btn').addEventListener('click', function() {
+        const container = document.getElementById('playerContainer');
+        if (container.requestFullscreen) container.requestFullscreen();
+        else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+    });
+
+    // ============================================================
+    // 🚀 СТАРТ
+    // ============================================================
+    function onYouTubeIframeAPIReady() {
+        playerReady = true;
+    }
+
+    document.getElementById('startBtn').addEventListener('click', function() {
+        document.getElementById('startOverlay').classList.add('hidden');
+        loadCurrentVideo();
+        setInterval(updateScheduleDisplay, 60 * 1000);
+    });
+
+    // Если оверлей уже скрыт (например, при перезагрузке)
+    if (document.getElementById('startOverlay').classList.contains('hidden')) {
+        document.getElementById('startBtn').click();
+    }
+</script>
 
 </body>
 </html>
