@@ -157,27 +157,27 @@
         // ================================================================
         //  👇👇👇  СЮДА ВСТАВЛЯЙТЕ СВОИ ВИДЕО  👇👇👇
         //  Формат: { id: 'КОД_ИЗ_ССЫЛКИ', title: 'Название', duration: СЕКУНДЫ }
+        //  Примеры (замените на свои):
         // ================================================================
         const playlist = [
-            // ----- ВАШИ ВИДЕО (ДОБАВЛЯЙТЕ СЮДА) -----
-            // Например:
-            // { id: 'ABC123', title: 'Мой фильм', duration: 7200 },
+            { id: 'byMMXeq0CcQ', title: 'Рик и Морти', duration: 1440 },
+            { id: '_23N3DmBRXk', title: 'Маша и Медведь', duration: 4264 },
+            { id: 'J5S3tU_mbi0', title: 'Симпсоны', duration: 3591 }
         ];
 
         // ================================================================
         //  ЗАСТАВКА (показывается каждые 5 минут)
-        //  Убедитесь, что видео с этим ID существует и разрешено встраивание
+        //  Укажите свой ID и реальную длительность
         // ================================================================
         const introId = 'UJOG59hELH8';   // ваша заставка
-        const introDuration = 11;        // реальная длительность заставки (в секундах)
+        const introDuration = 5;        // длительность в секундах
 
         // ================================================================
         //  НИЖЕ НИЧЕГО НЕ ТРОГАЙТЕ
         // ================================================================
 
-        // Если плейлист пуст — будем показывать только заставку в цикле
+        const totalDuration = playlist.reduce((sum, item) => sum + item.duration, 0);
         const hasPlaylist = playlist.length > 0;
-        const totalDuration = hasPlaylist ? playlist.reduce((sum, item) => sum + item.duration, 0) : 1;
 
         let isMuted = true;
         let lastLoadedVideoId = "";
@@ -202,18 +202,15 @@
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
 
-            // Заставка каждые 5 минут
-            if (minutes % 5 === 0 && seconds < introDuration) {
+            // Заставка только если есть плейлист, и только в начале каждой 5-минутки
+            if (hasPlaylist && minutes % 5 === 0 && seconds < introDuration) {
                 loadVideo(introId, 0, '📺 Заставка Мульт ТВ');
                 return;
             }
 
             if (!hasPlaylist) {
-                // Если нет видео в плейлисте, показываем заставку как основное содержимое
-                // (чтобы не было пустого экрана)
-                if (lastLoadedVideoId !== introId) {
-                    loadVideo(introId, 0, '📺 Мульт ТВ — ожидание эфира');
-                }
+                currentTrack.textContent = 'Добавьте видео в плейлист!';
+                // Можно оставить чёрный экран или показать что-то по умолчанию
                 return;
             }
 
@@ -257,7 +254,6 @@
                         document.getElementById('onlineCount').textContent = Math.floor(Math.random() * 5) + 1;
                     });
             }
-
             fetchCount();
             setInterval(fetchCount, 5000);
         }
